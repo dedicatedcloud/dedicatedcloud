@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conference Room Schedule</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.min.css">
+
+    <style>
+                @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Outfit', sans-serif;
+        }
+        h1 {
+            text-align: center;
+        }
+        /* Tab container */
+        .tab {
+            display: flex;
+            cursor: pointer;
+            background-color: #f1f1f1;
+            padding: 10px 10px;
+        }
+        .tab button {
+            flex: 1;
+            background-color: inherit;
+            border: none;
+            outline: none;
+            padding: 14px 16px;
+            font-size: 16px;
+            color: #ccc;
+            transition: background-color 0.3s;
+        }
+        .tab button:hover {
+            background-color: #0000ff;
+        }
+        .tab button.active {
+            background-color: blue;
+            color: white;
+        }
+
+        /* Tab content */
+        .tabcontent {
+            display: none;
+            padding: 20px;
+            border-top: none;
+        }
+        .tabcontent.active {
+            display: block;
+        }
+
+        /* Schedule Table */
+        .schedule-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .schedule-table th, .schedule-table td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: left;
+        }
+        .schedule-table th {
+            background-color: #f1f1f1;
+        }
+        .time-col {
+            width: 100px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Conference Room Schedule</h1>
+
+<div class="tab">
+    <button class="tablinks active" onclick="openRoom(event, 'Room1')">Room 1</button>
+    <button class="tablinks" onclick="openRoom(event, 'Room2')">Room 2</button>
+    <button class="tablinks" onclick="openRoom(event, 'Room3')">Room 3</button>
+    <button class="tablinks" onclick="openRoom(event, 'Room4')">Room 4</button>
+    <button class="tablinks" onclick="openRoom(event, 'Room5')">Room 5</button>
+</div>
+
+<div id="Room1" class="tabcontent active">
+    <h2>Room 1 Schedule</h2>
+    <table class="schedule-table">
+        <tr>
+            <th class="time-col">Time</th>
+            <th>Speaker</th>
+            <th>Topic</th>
+        </tr>
+        <tr>
+            <td>09:00 AM</td>
+            <td>John Doe</td>
+            <td>Keynote Address</td>
+        </tr>
+        <tr>
+            <td>10:00 AM</td>
+            <td>Jane Smith</td>
+            <td>Web Development in 2024</td>
+        </tr>
+        <tr>
+            <td>11:00 AM</td>
+            <td>Alan White</td>
+            <td>AI in Healthcare</td>
+        </tr>
+        <tr>
+            <td>01:00 PM</td>
+            <td>Michael Brown</td>
+            <td>Cybersecurity Trends</td>
+        </tr>
+        <tr>
+            <td>02:00 PM</td>
+            <td>Jane Smith</td>
+            <td>Web Development in 2024</td>
+        </tr>
+        <tr>
+            <td>03:00 PM</td>
+            <td>Alan White</td>
+            <td>AI in Healthcare</td>
+        </tr>
+        <!-- Add more time slots and speakers here -->
+    </table>
+</div>
+
+<div id="Room2" class="tabcontent">
+    <h2>Room 2 Schedule</h2>
+    <table class="schedule-table">
+        <tr>
+            <th class="time-col">Time</th>
+            <th>Speaker</th>
+            <th>Topic</th>
+        </tr>
+        <tr>
+            <td>09:00 AM</td>
+            <td>Michael Brown</td>
+            <td>Cybersecurity Trends</td>
+        </tr>
+        <tr>
+            <td>10:00 AM</td>
+            <td>Sarah Connor</td>
+            <td>Cloud Computing</td>
+        </tr>
+        <tr>
+            <td>11:00 AM</td>
+            <td>Steve Rogers</td>
+            <td>Leadership in Tech</td>
+        </tr>
+        <!-- Add more time slots and speakers here -->
+    </table>
+</div>
+
+<div id="Room3" class="tabcontent">
+    <h2>Room 3 Schedule</h2>
+    <table class="schedule-table">
+        <tr>
+            <th class="time-col">Time</th>
+            <th>Speaker</th>
+            <th>Topic</th>
+        </tr>
+        <tr>
+            <td>09:00 AM</td>
+            <td>Emily Davis</td>
+            <td>DevOps Best Practices</td>
+        </tr>
+        <tr>
+            <td>10:00 AM</td>
+            <td>Thomas Clark</td>
+            <td>Data Science in Business</td>
+        </tr>
+        <tr>
+            <td>11:00 AM</td>
+            <td>Mark Richards</td>
+            <td>Blockchain Technology</td>
+        </tr>
+        <!-- Add more time slots and speakers here -->
+    </table>
+</div>
+
+<div id="Room4" class="tabcontent">
+    <h2>Room 4 Schedule</h2>
+    <table class="schedule-table">
+        <tr>
+            <th class="time-col">Time</th>
+            <th>Speaker</th>
+            <th>Topic</th>
+        </tr>
+        <tr>
+            <td>09:00 AM</td>
+            <td>Alice Walker</td>
+            <td>Quantum Computing</td>
+        </tr>
+        <tr>
+            <td>10:00 AM</td>
+            <td>Robinson Woods</td>
+            <td>Mobile App Development</td>
+        </tr>
+        <tr>
+            <td>11:00 AM</td>
+            <td>Elena Green</td>
+            <td>Future of AI</td>
+        </tr>
+        <!-- Add more time slots and speakers here -->
+    </table>
+</div>
+
+<div id="Room5" class="tabcontent">
+    <h2>Room 5 Schedule</h2>
+    <table class="schedule-table">
+        <tr>
+            <th class="time-col">Time</th>
+            <th>Speaker</th>
+            <th>Topic</th>
+        </tr>
+        <tr>
+            <td>09:00 AM</td>
+            <td>William Black</td>
+            <td>Design Thinking</td>
+        </tr>
+        <tr>
+            <td>10:00 AM</td>
+            <td>Natalie Adams</td>
+            <td>AI Ethics</td>
+        </tr>
+        <tr>
+            <td>11:00 AM</td>
+            <td>Victor King</td>
+            <td>Innovation in Business</td>
+        </tr>
+        <!-- Add more time slots and speakers here -->
+    </table>
+</div>
+
+<script>
+    function openRoom(evt, roomName) {
+        // Hide all tabcontent elements
+        var tabcontent = document.getElementsByClassName("tabcontent");
+        for (var i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].classList.remove("active");
+        }
+
+        // Remove active class from all tablinks
+        var tablinks = document.getElementsByClassName("tablinks");
+        for (var i = 0; i < tablinks.length; i++) {
+            tablinks[i].classList.remove("active");
+        }
+
+        // Show the current tab and add active class to the clicked tab
+        document.getElementById(roomName).classList.add("active");
+        evt.currentTarget.classList.add("active");
+    }
+</script>
+
+</body>
+</html>
