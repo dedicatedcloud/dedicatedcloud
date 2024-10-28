@@ -1,5 +1,5 @@
 ## Hi there 👋
-
+<!--
 
 **dedicatedcloud/dedicatedcloud** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
 
@@ -14,10 +14,10 @@ Here are some ideas to get you started:
 - 😄 Pronouns: ...
 - ⚡ Fun fact: ...
 -->
-[Link 1](#link-1)
+  [Conference Room Schedule](https://dedicatedcloud.github.io/dedicatedcloud/conference-room-schedule.html)
 
 
-
+<!--
 # Project Title
 
 A brief description of what this project does and who it's for
@@ -295,4 +295,4 @@ Add badges from somewhere like: [shields.io](https://shields.io/)
 
 
 ##  My Section
-
+-->
