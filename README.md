@@ -1,6 +1,6 @@
 ## Hi there 👋
 
-<!--
+
 **dedicatedcloud/dedicatedcloud** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
 
 Here are some ideas to get you started:
@@ -16,7 +16,7 @@ Here are some ideas to get you started:
 -->
 [Link 1](#link-1)
 
-<!--
+
 
 # Project Title
 
@@ -295,4 +295,4 @@ Add badges from somewhere like: [shields.io](https://shields.io/)
 
 
 ##  My Section
--->
+
