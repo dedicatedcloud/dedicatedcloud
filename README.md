@@ -18,6 +18,7 @@ Here are some ideas to get you started:
 
   [Dynamic SVG Editor](https://dedicatedcloud.github.io/dedicatedcloud/dynamic-svg-editor.html)
 
+  [Dynamic SVG Editor 2 Lines](https://dedicatedcloud.github.io/dedicatedcloud/dynamic-svg-editor-two-lines.html)
 <!--
 # Hi there, I'm DedicatedCloud! ☁️
 
