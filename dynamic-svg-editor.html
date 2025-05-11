@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic SVG Editor</title>
+    <style>
+        body {
+            font-family: 'Manrope', sans-serif;
+        }
+        #svg-container {
+            border: 1px solid #000;
+            display: inline-block;
+            margin-top: 20px;
+        }
+        .form-group {
+            margin-bottom: 10px;
+        }
+        #base64Output {
+            margin-top: 20px;
+            word-break: break-all;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <h1>Dynamic SVG Editor</h1>
+    <form id="svgForm">
+        <div class="form-group">
+            <label for="toplineText">Top Line Text:</label>
+            <input type="text" id="toplineText" value="TEXT HERE">
+        </div>
+        <div class="form-group">
+            <label for="backgroundColor">Background Color:</label>
+            <input type="color" id="backgroundColor" value="#0738be">
+        </div>
+        <div class="form-group">
+            <label for="strokeColor">Stroke Color:</label>
+            <input type="color" id="strokeColor" value="#0738be">
+        </div>
+        <div class="form-group">
+            <label for="toplineColor">Top Line Color:</label>
+            <input type="color" id="toplineColor" value="#ffffff">
+        </div>
+        <div class="form-group">
+            <label for="iconColor">Icon Color:</label>
+            <input type="color" id="iconColor" value="#0738be">
+        </div>
+        <button type="button" onclick="updateSVG()">Update SVG</button>
+        <button type="button" onclick="generateBase64Code()">Generate Base64 HTML Image Code</button>
+    </form>
+    
+    <div id="base64Output"></div>
+
+    <div id="svg-container">
+        <svg id="dynamicSVG" width="500" height="300" viewBox="0 0 500 300" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+            <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                <g transform="translate(-130.000000, -73.000000)">
+                    <g transform="translate(130.000000, 73.000000)">
+                        <rect id="backgroundRect" stroke="#635FEE" stroke-width="1" fill="#0738be" x="0.5" y="0.5" width="499" height="299" rx="10"></rect>
+                        <text id="toplineTextElement" font-family="Manrope, sans-serif" font-size="50" font-weight="bold" fill="#ffffff" text-anchor="middle" dominant-baseline="middle">
+                            <tspan x="250" y="150">Your Text</tspan>
+                        </text>
+                        <!-- <g transform="translate(11.000000, 12.000000)" id="iconShape">
+                            <path d="M31,15.5 C31,24.0603917 24.0603917,31 15.5,31 C6.93960833,31 0,24.0603917 0,15.5 C0,6.93960833 6.93960833,0 15.5,0 C24.0603917,0 31,6.93960833 31,15.5" fill="#635FEE"></path>
+                            <path d="M17.4329412,15.9558824 L17.4329412,15.9560115 L13.0929412,15.9560115 L13.0929412,11.3060115 L17.4329412,11.3060115 L17.4329412,11.3058824 C18.7018806,11.3058824 19.7305882,12.3468365 19.7305882,13.6308824 C19.7305882,14.9149282 18.7018806,15.9558824 17.4329412,15.9558824 M17.4329412,8.20588235 L17.4329412,8.20601152 L10.0294118,8.20588235 L10.0294118,23.7058824 L13.0929412,23.7058824 L13.0929412,19.0560115 L17.4329412,19.0560115 L17.4329412,19.0558824 C20.3938424,19.0558824 22.7941176,16.6270324 22.7941176,13.6308824 C22.7941176,10.6347324 20.3938424,8.20588235 17.4329412,8.20588235" fill="#FFFFFF"></path>
+                        </g> -->
+                    </g>
+                </g>
+            </g>
+        </svg>
+    </div>
+
+
+    <script>
+        function updateSVG() {
+            const toplineText = document.getElementById('toplineText').value;
+            const backgroundColor = document.getElementById('backgroundColor').value;
+            const strokeColor = document.getElementById('strokeColor').value;
+            const toplineColor = document.getElementById('toplineColor').value;
+            const iconColor = document.getElementById('iconColor').value;
+
+            const backgroundRect = document.getElementById('backgroundRect');
+            const toplineTextElement = document.getElementById('toplineTextElement');
+            const iconShape = document.getElementById('iconShape');
+
+            backgroundRect.setAttribute('fill', backgroundColor);
+            backgroundRect.setAttribute('stroke', strokeColor);
+
+            toplineTextElement.setAttribute('fill', toplineColor);
+            toplineTextElement.querySelector('tspan').textContent = toplineText;
+
+            iconShape.setAttribute('fill', iconColor);
+        }
+
+        function generateBase64Code() {
+            const svgElement = document.getElementById('dynamicSVG');
+            const serializer = new XMLSerializer();
+            const source = serializer.serializeToString(svgElement);
+            
+            // Convert SVG source to Base64
+            const svgBase64 = btoa(unescape(encodeURIComponent(source)));
+            const base64Image = `data:image/svg+xml;base64,${svgBase64}`;
+            
+            // Display Base64 HTML Image Code
+            const base64Output = document.getElementById('base64Output');
+            base64Output.innerHTML = `<code>&lt;img src="${base64Image}" /&gt;</code>`;
+        }
+    </script>
+</body>
+</html>
