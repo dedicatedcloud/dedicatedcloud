@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dynamic SVG Editor Pro+</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700&family=Roboto&family=Open+Sans&family=Lato&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Manrope', sans-serif;
+    }
+    #svg-container {
+      border: 1px solid #000;
+      display: inline-block;
+      margin-top: 20px;
+    }
+    .form-group {
+      margin-bottom: 10px;
+    }
+    select, input[type="number"], input[type="color"], input[type="text"] {
+      width: 100%;
+    }
+    .toggle-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+  </style>
+</head>
+<body>
+  <h1>SVG Editor Pro+</h1>
+  <form id="svgForm">
+    <h2>Top Line</h2>
+    <div class="form-group">
+      <label for="topLineText">Text:</label>
+      <input type="text" id="topLineText" value="TOP TEXT">
+    </div>
+    <div class="form-group">
+      <label for="topFontSize">Font Size:</label>
+      <input type="number" id="topFontSize" value="30" min="10">
+    </div>
+    <div class="form-group">
+      <label for="topFont">Font:</label>
+      <select id="topFont">
+        <option value="Manrope">Manrope</option>
+        <option value="Roboto">Roboto</option>
+        <option value="Open Sans">Open Sans</option>
+        <option value="Lato">Lato</option>
+      </select>
+    </div>
+    <div class="toggle-row">
+      <label><input type="checkbox" id="topBold"> Bold</label>
+      <label><input type="checkbox" id="topItalic"> Italic</label>
+      <label>Align:
+        <select id="topAlign">
+          <option value="start">Left</option>
+          <option value="middle" selected>Center</option>
+          <option value="end">Right</option>
+        </select>
+      </label>
+    </div>
+    <div class="form-group">
+      <label for="topLineColor">Color:</label>
+      <input type="color" id="topLineColor" value="#ffffff">
+    </div>
+
+    <h2>Bottom Line</h2>
+    <div class="form-group">
+      <label for="bottomLineText">Text:</label>
+      <input type="text" id="bottomLineText" value="BOTTOM TEXT">
+    </div>
+    <div class="form-group">
+      <label for="bottomFontSize">Font Size:</label>
+      <input type="number" id="bottomFontSize" value="30" min="10">
+    </div>
+    <div class="form-group">
+      <label for="bottomFont">Font:</label>
+      <select id="bottomFont">
+        <option value="Manrope">Manrope</option>
+        <option value="Roboto">Roboto</option>
+        <option value="Open Sans">Open Sans</option>
+        <option value="Lato">Lato</option>
+      </select>
+    </div>
+    <div class="toggle-row">
+      <label><input type="checkbox" id="bottomBold"> Bold</label>
+      <label><input type="checkbox" id="bottomItalic"> Italic</label>
+      <label>Align:
+        <select id="bottomAlign">
+          <option value="start">Left</option>
+          <option value="middle" selected>Center</option>
+          <option value="end">Right</option>
+        </select>
+      </label>
+    </div>
+    <div class="form-group">
+      <label for="bottomLineColor">Color:</label>
+      <input type="color" id="bottomLineColor" value="#ffffff">
+    </div>
+
+    <h2>Background & Image</h2>
+    <div class="form-group">
+      <label for="backgroundColor">Background Color:</label>
+      <input type="color" id="backgroundColor" value="#0738be">
+    </div>
+    <div class="form-group">
+      <label for="imageUpload">Upload Image:</label>
+      <input type="file" id="imageUpload" accept="image/*">
+    </div>
+    <div class="form-group">
+      <label for="imageWidth">Image Width (px):</label>
+      <input type="number" id="imageWidth" value="100" min="10">
+    </div>
+    <div class="form-group">
+      <label for="imageHeight">Image Height (px):</label>
+      <input type="number" id="imageHeight" value="100" min="10">
+    </div>
+
+    <button type="button" id="updateButton">Update SVG</button>
+    <button type="button" id="downloadButton">Download SVG</button>
+  </form>
+
+  <div id="svg-container">
+    <svg id="dynamicSVG" width="500" height="300" viewBox="0 0 500 300" xmlns="http://www.w3.org/2000/svg">
+      <rect id="backgroundRect" stroke="#635FEE" stroke-width="1" fill="#0738be" x="0.5" y="0.5" width="499" height="299" rx="10"></rect>
+      <image id="svgImage" x="200" y="10" width="100" height="100" href="" visibility="hidden"/>
+      <text id="topLineTextElement" font-size="30" text-anchor="middle" dominant-baseline="middle" fill="#ffffff">
+        <tspan x="250" y="150">TOP TEXT</tspan>
+      </text>
+      <text id="bottomLineTextElement" font-size="30" text-anchor="middle" dominant-baseline="middle" fill="#ffffff">
+        <tspan x="250" y="200">BOTTOM TEXT</tspan>
+      </text>
+    </svg>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const updateButton = document.getElementById('updateButton');
+      const downloadButton = document.getElementById('downloadButton');
+
+      function updateTextLine(line) {
+        const textElement = document.getElementById(`${line}LineTextElement`);
+        const tspan = textElement.querySelector('tspan');
+        const text = document.getElementById(`${line}LineText`).value;
+        const fontSize = document.getElementById(`${line}FontSize`).value;
+        const color = document.getElementById(`${line}LineColor`).value;
+        const font = document.getElementById(`${line}Font`).value;
+        const bold = document.getElementById(`${line}Bold`).checked;
+        const italic = document.getElementById(`${line}Italic`).checked;
+        const align = document.getElementById(`${line}Align`).value;
+
+        let fontWeight = bold ? "bold" : "normal";
+        let fontStyle = italic ? "italic" : "normal";
+
+        textElement.setAttribute("fill", color);
+        textElement.setAttribute("font-size", fontSize);
+        textElement.setAttribute("text-anchor", align);
+        textElement.setAttribute("font-family", font);
+        textElement.setAttribute("font-weight", fontWeight);
+        textElement.setAttribute("font-style", fontStyle);
+
+        let x = align === 'start' ? 20 : (align === 'end' ? 480 : 250);
+        tspan.setAttribute("x", x);
+        tspan.textContent = text;
+      }
+
+      function updateSVG() {
+        document.getElementById("backgroundRect").setAttribute("fill", document.getElementById("backgroundColor").value);
+        updateTextLine("top");
+        updateTextLine("bottom");
+
+        const image = document.getElementById("svgImage");
+        const width = parseInt(document.getElementById("imageWidth").value);
+        const height = parseInt(document.getElementById("imageHeight").value);
+        image.setAttribute("width", width);
+        image.setAttribute("height", height);
+      }
+
+      document.getElementById("imageUpload").addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = e => {
+          const image = document.getElementById("svgImage");
+          image.setAttribute("href", e.target.result);
+          image.setAttribute("visibility", "visible");
+        };
+        reader.readAsDataURL(file);
+      });
+
+      updateButton.addEventListener("click", updateSVG);
+
+      downloadButton.addEventListener("click", () => {
+        const svg = document.getElementById("dynamicSVG");
+        const serializer = new XMLSerializer();
+        const source = serializer.serializeToString(svg);
+        const blob = new Blob([source], { type: "image/svg+xml;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "svg-editor-pro.svg";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      });
+    });
+  </script>
+</body>
+</html>
