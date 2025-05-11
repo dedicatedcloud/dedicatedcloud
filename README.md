@@ -16,6 +16,8 @@ Here are some ideas to get you started:
 -->
   [Conference Room Schedule](https://dedicatedcloud.github.io/dedicatedcloud/conference-room-schedule.html)
 
+  [Dynamic SVG Editor](https://dedicatedcloud.github.io/dedicatedcloud/dynamic-svg-editor.html)
+
 <!--
 # Hi there, I'm DedicatedCloud! ☁️
 
