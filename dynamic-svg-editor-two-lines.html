@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dynamic SVG Editor - Two Lines</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Manrope', sans-serif;
+    }
+    #svg-container {
+      border: 1px solid #000;
+      display: inline-block;
+      margin-top: 20px;
+    }
+    .form-group {
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Dynamic SVG Editor - Two Lines</h1>
+  <form id="svgForm">
+    <div class="form-group">
+      <label for="topLineText">Top Line Text:</label>
+      <input type="text" id="topLineText" value="TOP TEXT">
+    </div>
+    <div class="form-group">
+      <label for="topLineColor">Top Line Color:</label>
+      <input type="color" id="topLineColor" value="#ffffff">
+    </div>
+    <div class="form-group">
+      <label for="bottomLineText">Bottom Line Text:</label>
+      <input type="text" id="bottomLineText" value="BOTTOM TEXT">
+    </div>
+    <div class="form-group">
+      <label for="bottomLineColor">Bottom Line Color:</label>
+      <input type="color" id="bottomLineColor" value="#ffffff">
+    </div>
+    <div class="form-group">
+      <label for="backgroundColor">Background Color:</label>
+      <input type="color" id="backgroundColor" value="#0738be">
+    </div>
+    <button type="button" id="updateButton">Update SVG</button>
+    <button type="button" id="downloadButton">Download SVG</button>
+  </form>
+
+  <div id="svg-container">
+    <svg id="dynamicSVG" width="500" height="300" viewBox="0 0 500 300" version="1.1" xmlns="http://www.w3.org/2000/svg">
+      <rect id="backgroundRect" stroke="#635FEE" stroke-width="1" fill="#0738be" x="0.5" y="0.5" width="499" height="299" rx="10"></rect>
+      <!-- Top line text centered horizontally -->
+      <text id="topLineTextElement" font-family="Manrope, sans-serif" font-size="30" font-weight="bold" text-anchor="middle" dominant-baseline="middle" fill="#ffffff">
+        <tspan x="250" y="120">TOP TEXT</tspan>
+      </text>
+      <!-- Bottom line text centered horizontally -->
+      <text id="bottomLineTextElement" font-family="Manrope, sans-serif" font-size="30" font-weight="bold" text-anchor="middle" dominant-baseline="middle" fill="#ffffff">
+        <tspan x="250" y="180">BOTTOM TEXT</tspan>
+      </text>
+    </svg>
+  </div>
+
+  <script>
+    'use strict';
+    
+    document.addEventListener('DOMContentLoaded', function() {
+      // Cache DOM elements
+      const updateButton = document.getElementById('updateButton');
+      const downloadButton = document.getElementById('downloadButton');
+      
+      const topLineTextInput = document.getElementById('topLineText');
+      const topLineColorInput = document.getElementById('topLineColor');
+      
+      const bottomLineTextInput = document.getElementById('bottomLineText');
+      const bottomLineColorInput = document.getElementById('bottomLineColor');
+      
+      const backgroundColorInput = document.getElementById('backgroundColor');
+      
+      const backgroundRect = document.getElementById('backgroundRect');
+      const topLineTextElement = document.getElementById('topLineTextElement');
+      const bottomLineTextElement = document.getElementById('bottomLineTextElement');
+      const svgElement = document.getElementById('dynamicSVG');
+
+      // Update SVG function with error checking
+      function updateSVG() {
+        try {
+          const topLineText = topLineTextInput.value;
+          const topLineColor = topLineColorInput.value;
+          const bottomLineText = bottomLineTextInput.value;
+          const bottomLineColor = bottomLineColorInput.value;
+          const backgroundColor = backgroundColorInput.value;
+          
+          // Update background rectangle
+          if (backgroundRect) {
+            backgroundRect.setAttribute('fill', backgroundColor);
+          }
+          
+          // Update top line text and color
+          if (topLineTextElement) {
+            const tspanTop = topLineTextElement.querySelector('tspan');
+            if (tspanTop) {
+              tspanTop.textContent = topLineText;
+              topLineTextElement.setAttribute('fill', topLineColor);
+            }
+          }
+          
+          // Update bottom line text and color
+          if (bottomLineTextElement) {
+            const tspanBottom = bottomLineTextElement.querySelector('tspan');
+            if (tspanBottom) {
+              tspanBottom.textContent = bottomLineText;
+              bottomLineTextElement.setAttribute('fill', bottomLineColor);
+            }
+          }
+        } catch (error) {
+          console.error('Error updating SVG:', error);
+        }
+      }
+      
+      // Download SVG function with resource cleanup
+      function downloadSVG() {
+        try {
+          const serializer = new XMLSerializer();
+          const source = serializer.serializeToString(svgElement);
+          const svgBlob = new Blob([source], { type: 'image/svg+xml;charset=utf-8' });
+          const url = URL.createObjectURL(svgBlob);
+          
+          const downloadLink = document.createElement('a');
+          downloadLink.href = url;
+          downloadLink.download = 'custom.svg';
+          document.body.appendChild(downloadLink);
+          downloadLink.click();
+          document.body.removeChild(downloadLink);
+          
+          // Clean up the object URL
+          URL.revokeObjectURL(url);
+        } catch (error) {
+          console.error('Error downloading SVG:', error);
+        }
+      }
+      
+      // Attach event listeners
+      updateButton.addEventListener('click', updateSVG);
+      downloadButton.addEventListener('click', downloadSVG);
+    });
+  </script>
+</body>
+</html>
