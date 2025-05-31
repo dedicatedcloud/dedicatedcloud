@@ -28,7 +28,7 @@ Here are some ideas to get you started:
 [Dynamic SVG Editor 2 Lines](https://dedicatedcloud.github.io/dedicatedcloud/
 [Dynamic SVG Editor 2 Lines](https://dedicatedcloud.github.io/dedicatedcloud/
 [Dynamic SVG Editor 2 Lines](https://dedicatedcloud.github.io/dedicatedcloud/
-[Dynamic SVG Editor 2 Lines](https://dedicatedcloud.github.io/dedicatedcloud/
+[Dynamic SVG Editor 2 Lines](https://dedicatedcloud.github.io/dedicatedcloud/ -->
 # Hi there, I'm DedicatedCloud! ☁️
 
 Welcome to my GitHub profile! I'm passionate about building scalable, reliable, and innovative cloud-based solutions. Whether it's automating workflows, contributing to open-source projects, or experimenting with new technologies, I'm always eager to learn and share knowledge.
