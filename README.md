@@ -21,8 +21,10 @@ Here are some ideas to get you started:
   [Dynamic SVG Editor 2 Lines](https://dedicatedcloud.github.io/dedicatedcloud/dynamic-svg-editor-two-lines.html)
 
   [Dynamic SVG Editor Pro +](https://dedicatedcloud.github.io/dedicatedcloud/dynamic-svg-editor-pro.html)
+
+  [Bookmarklet Maker](https://dedicatedcloud.github.io/dedicatedcloud/bookmarklet.html).
 <!--
-[Dynamic SVG Editor 2 Lines](https://dedicatedcloud.github.io/dedicatedcloud/
+
 [Dynamic SVG Editor 2 Lines](https://dedicatedcloud.github.io/dedicatedcloud/
 [Dynamic SVG Editor 2 Lines](https://dedicatedcloud.github.io/dedicatedcloud/
 [Dynamic SVG Editor 2 Lines](https://dedicatedcloud.github.io/dedicatedcloud/
