@@ -1,0 +1,190 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Tree to Shell Script Converter</title>
+  <style>
+    body {
+      font-family: monospace;
+      background: #f8f8f8;
+      padding: 2rem;
+    }
+    textarea, pre {
+      width: 100%;
+      font-family: monospace;
+      padding: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    textarea {
+      height: 250px;
+      margin-bottom: 1rem;
+      resize: vertical;
+    }
+    pre {
+      white-space: pre-wrap;
+      background: #eee;
+      margin-top: 1rem;
+      min-height: 150px;
+    }
+    button {
+      padding: 0.7rem 1.2rem;
+      font-size: 1rem;
+      background-color: #333;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-right: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    .buttons {
+      margin-bottom: 1rem;
+    }
+    .dropzone {
+      border: 2px dashed #999;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      background: #fff;
+      text-align: center;
+      color: #777;
+    }
+    .dropzone.dragover {
+      background: #e0f7fa;
+      border-color: #00796b;
+      color: #00796b;
+    }
+  </style>
+</head>
+<body>
+
+<h2>📁 Directory Tree → Shell Script</h2>
+
+<div class="dropzone" id="dropzone">Drag & Drop a .txt file here or paste below</div>
+
+<textarea id="treeInput" placeholder="Paste tree structure here..."></textarea>
+
+<div class="buttons">
+  <button onclick="convertTree()">Convert</button>
+  <button onclick="copyOutput()">Copy Output</button>
+  <button onclick="downloadScript()">Download .sh</button>
+  <button onclick="clearAll()">Clear</button>
+</div>
+
+<pre id="output" placeholder="Shell script output..."></pre>
+
+<script>
+function convertTree() {
+  const lines = document.getElementById("treeInput").value.trim().split("\n");
+  const dirs = new Set();
+  const files = [];
+  const pathStack = [];
+
+  lines.forEach(line => {
+    const trimmed = line.replace(/^[\s│├└─]+/, '');
+    const indent = (line.match(/^[\s│├└─]+/) || [''])[0];
+    const depth = Math.floor((indent.match(/│|├|└| /g) || []).length / 2);
+
+    pathStack.length = depth;
+    pathStack[depth] = trimmed;
+
+    const fullPath = pathStack.slice(0, depth + 1).join('/');
+    const normalizedPath = fullPath.replace(/\/+/g, '/');
+
+    if (/\.\w+$/.test(trimmed)) {
+      files.push(normalizedPath);
+      const parent = normalizedPath.substring(0, normalizedPath.lastIndexOf('/'));
+      if (parent) dirs.add(parent);
+    } else {
+      dirs.add(normalizedPath);
+    }
+  });
+
+  const mkdirs = [...dirs].sort((a, b) => a.split('/').length - b.split('/').length)
+    .map(dir => `mkdir -p "${dir}"`);
+  const touches = files.map(file => `touch "${file}"`);
+
+  document.getElementById('output').textContent = [...mkdirs, '', ...touches].join('\n');
+}
+
+function copyOutput() {
+  const output = document.getElementById('output').textContent;
+  if (!output) return;
+  navigator.clipboard.writeText(output).then(() => {
+    alert("Copied to clipboard!");
+  });
+}
+
+function clearAll() {
+  document.getElementById('treeInput').value = '';
+  document.getElementById('output').textContent = '';
+}
+
+function downloadScript() {
+  const output = document.getElementById('output').textContent;
+  if (!output) return;
+  const blob = new Blob([output], { type: 'text/x-shellscript' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'tree-to-shell.sh';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// Drag & Drop
+const dropzone = document.getElementById('dropzone');
+dropzone.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  dropzone.classList.add('dragover');
+});
+dropzone.addEventListener('dragleave', () => {
+  dropzone.classList.remove('dragover');
+});
+dropzone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  dropzone.classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type === "text/plain") {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      document.getElementById('treeInput').value = event.target.result;
+    };
+    reader.readAsText(file);
+  } else {
+    alert("Please drop a .txt file.");
+  }
+});
+</script>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
