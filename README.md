@@ -17,6 +17,8 @@
 
   [Bookmarklet Maker](https://dedicatedcloud.github.io/dedicatedcloud/bookmarklet.html).
 
+[Tree To Shell](https://dedicatedcloud.github.io/dedicatedcloud/tree-to-shell.html).
+
 
 
 
@@ -30,7 +32,6 @@
 
 <!--
 
-[Dynamic SVG Editor 2 Lines](https://dedicatedcloud.github.io/dedicatedcloud/
 [Dynamic SVG Editor 2 Lines](https://dedicatedcloud.github.io/dedicatedcloud/
 [Dynamic SVG Editor 2 Lines](https://dedicatedcloud.github.io/dedicatedcloud/
 [Dynamic SVG Editor 2 Lines](https://dedicatedcloud.github.io/dedicatedcloud/
