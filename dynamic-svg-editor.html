@@ -91,7 +91,9 @@
             toplineTextElement.setAttribute('fill', toplineColor);
             toplineTextElement.querySelector('tspan').textContent = toplineText;
 
-            iconShape.setAttribute('fill', iconColor);
+            if (iconShape) {
+                iconShape.setAttribute('fill', iconColor);
+            }
         }
 
         function generateBase64Code() {
