@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Neon Sign – Editable with Screenshot</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+      <script src="assets/ybgr.min.js"></script>
+
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      background: #090000;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+    }
+
+    h1 {
+      font-family: "Nunito", sans-serif;
+      font-size: 100px;
+      font-weight: 400;
+      outline: none;
+    }
+
+    h2 {
+      font-family: "Playwrite CU", cursive;
+      font-size: 50px;
+      outline: none;
+    }
+
+    .pink {
+      color: azure;
+      --color1: #ffc9f3;
+      --color2: #ff93e7;
+      --color3: #ca1f7b;
+      --color4: magenta;
+      --color5: #b81d70;
+    }
+
+    .turquoise {
+      color: #e2fefe;
+      --color1: #b1fdfe;
+      --color2: #80fdff;
+      --color3: #4ffcff;
+      --color4: #1efbff;
+      --color5: #00e9ec;
+    }
+
+    .neon {
+      text-shadow:
+        0 0 10px var(--color1),
+        0 0 20px var(--color2),
+        0 0 40px var(--color3),
+        0 0 80px var(--color4),
+        0 0 100px var(--color4);
+    }
+
+    /* Capture area (only this will be screenshotted) */
+    #capture {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 60vh;
+      width: 100%;
+    }
+
+    /* Fixed button kept out of the screenshot */
+    #screenshotBtn {
+      position: fixed;
+      right: 16px;
+      top: 16px;
+      padding: 10px 20px;
+      background: #00e9ec;
+      border: none;
+      cursor: pointer;
+      font-size: 18px;
+      border-radius: 6px;
+      user-select: none;
+      color: #000;
+    }
+    #screenshotBtn[disabled] { opacity: 0.6; cursor: progress; }
+
+    /* Contenteditable placeholder emulation */
+    [contenteditable][placeholder]:empty::before {
+      content: attr(placeholder);
+      opacity: 0.6;
+      pointer-events: none;
+    }
+    [contenteditable][placeholder]:empty:focus::before { content: ""; }
+
+    [contenteditable] {
+      caret-color: #fff;
+      min-height: 1em;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="capture">
+    <h2 spellcheck="false" class="neon pink" contenteditable="true" placeholder="Click me"></h2>
+    <h1 spellcheck="false" class="neon turquoise" contenteditable="true" placeholder="To edit me"></h1>
+  </div>
+
+  <button id="screenshotBtn" type="button">Take Screenshot</button>
+
+  <script>
+    // Placeholder tidy so :empty stays reliable
+    document.querySelectorAll('[contenteditable][placeholder]').forEach(el => {
+      const tidy = () => { if (el.textContent.trim() === '') el.innerHTML = ''; };
+      el.addEventListener('input', tidy);
+      el.addEventListener('blur', tidy);
+    });
+
+    // Screenshot logic — assumes you've included html2canvas locally before this script
+    (function () {
+      const btn = document.getElementById('screenshotBtn');
+      const target = document.getElementById('capture');
+
+      btn.addEventListener('click', async () => {
+        if (typeof html2canvas !== 'function') {
+          alert('html2canvas is not loaded. Include your local html2canvas script before this block.');
+          return;
+        }
+
+        btn.disabled = true;
+
+        // Avoid caret/selection artifacts
+        if (document.activeElement && document.activeElement.isContentEditable) {
+          document.activeElement.blur();
+        }
+        const originalCaret = target.style.caretColor;
+        target.style.caretColor = 'transparent';
+
+        try {
+          const canvas = await html2canvas(target, {
+            backgroundColor: getComputedStyle(document.body).backgroundColor,
+            useCORS: false,
+            scale: window.devicePixelRatio || 1,
+            logging: false
+          });
+
+          const link = document.createElement('a');
+          link.download = 'neon-screenshot.png';
+          link.href = canvas.toDataURL('image/png');
+          link.click();
+        } finally {
+          target.style.caretColor = originalCaret || '';
+          btn.disabled = false;
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
