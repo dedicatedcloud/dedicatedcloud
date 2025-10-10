@@ -1,2 +1,556 @@
 
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>CSV → BIND Zone Generator (Cloudflare Pages)</title>
+  <meta name="referrer" content="no-referrer" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'">
+  <style>
+    :root { --bg:#0b1020; --fg:#e7edf7; --muted:#9fb0c6; --accent:#68a0ff; --ok:#7ed957; --bad:#ff6b6b; --warn:#f5c84c; --card:#151b31; --border:#243056; --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; --sans: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji"; }
+    * { box-sizing: border-box }
+    body { margin:0; font-family:var(--sans); color:var(--fg); background:linear-gradient(180deg,#0a0f1e,#0b1022 120vh); }
+    header { padding:1.25rem 1rem; border-bottom:1px solid var(--border); background:rgba(10,15,34,.7); backdrop-filter: blur(6px); position:sticky; top:0; z-index:9 }
+    h1 { margin:.2rem 0; font-size:1.25rem }
+    main { max-width:1100px; margin:1rem auto 4rem; padding:0 1rem }
+    .grid { display:grid; gap:1rem }
+    @media(min-width:960px){ .grid { grid-template-columns: 360px 1fr } }
+    .card { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:1rem }
+    fieldset { border:1px dashed var(--border); border-radius:8px; padding: .75rem .9rem 1rem; margin:0 0 .75rem }
+    legend { padding:.1rem .4rem; color:var(--muted); font-size:.85rem }
+    label { display:block; font-size:.9rem; color:var(--muted); margin:.35rem 0 .25rem }
+    input[type="text"], input[type="number"], textarea, select {
+      width:100%; padding:.6rem .7rem; border-radius:8px; border:1px solid var(--border); background:#0e1530; color:var(--fg); font-size:.95rem; outline:none;
+    }
+    input[type="file"] { width:100% }
+    .row { display:grid; grid-template-columns: 1fr 1fr; gap:.6rem }
+    .btns { display:flex; gap:.6rem; flex-wrap:wrap; margin-top:.6rem }
+    button, .button {
+      border:1px solid var(--border); background:#122049; color:var(--fg); padding:.55rem .8rem; border-radius:8px; cursor:pointer; font-weight:600
+    }
+    button:hover, .button:hover { border-color:#3956a3 }
+    .primary { background:var(--accent); color:#08122a; border-color:#3f71f6 }
+    .ok { background:var(--ok); color:#08210b; border-color:#4fb235 }
+    .warn { background:var(--warn); color:#2a2006; border-color:#e6b21c }
+    .danger { background:var(--bad); color:#280a0a; border-color:#cc5252 }
+    .muted { color:var(--muted) }
+    .drop {
+      border:2px dashed var(--border); border-radius:10px; padding:1rem; text-align:center; color:var(--muted); background:#0f1633;
+    }
+    .drop.dragover { border-color:var(--accent); background:#12214a }
+    table { width:100%; border-collapse: collapse; font-size:.9rem; background:#0f1633; border:1px solid var(--border); border-radius:8px; overflow:hidden }
+    th, td { border-bottom:1px solid var(--border); padding:.5rem .6rem; text-align:left; vertical-align:top }
+    th { position:sticky; top:0; background:#111b3b; z-index:1 }
+    tr.problem td { background: rgba(255,107,107,.08) }
+    code, pre { font-family:var(--mono); }
+    #zoneOut { width:100%; min-height:360px; font-size:.9rem; background:#0a122b; border:1px solid var(--border); border-radius:10px; padding:1rem; color:var(--fg); }
+    .help { font-size:.85rem; color:var(--muted) }
+    .badge { display:inline-block; padding:.1rem .4rem; border-radius:6px; border:1px solid var(--border); background:#10183a; color:var(--muted); font-size:.75rem }
+    .footer { margin-top:1.25rem; color:var(--muted); font-size:.85rem }
+    .kbd { font-family:var(--mono); padding:.05rem .35rem; border:1px solid var(--border); border-radius:4px; background:#0d1634; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>CSV → BIND Zone Generator</h1>
+    <div class="help">Client-side only. Drop a CSV, set zone header, generate a clean BIND file ready to import or adapt (Cloudflare-compatible formatting and comments).</div>
+  </header>
+
+  <main class="grid">
+    <!-- LEFT: CONFIG + INPUT -->
+    <section class="card">
+      <fieldset>
+        <legend>Zone Header</legend>
+        <label for="zone">Zone (root domain)</label>
+        <input id="zone" type="text" placeholder="example.com" inputmode="url" autocomplete="off" />
+
+        <div class="row">
+          <div>
+            <label for="ttl">Default TTL (seconds)</label>
+            <input id="ttl" type="number" min="1" step="1" value="3600" />
+          </div>
+          <div>
+            <label for="refresh">SOA Refresh</label>
+            <input id="refresh" type="number" min="60" step="1" value="10000" />
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label for="retry">SOA Retry</label>
+            <input id="retry" type="number" min="60" step="1" value="2400" />
+          </div>
+          <div>
+            <label for="expire">SOA Expire</label>
+            <input id="expire" type="number" min="300" step="1" value="604800" />
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label for="minimum">SOA Minimum</label>
+            <input id="minimum" type="number" min="60" step="1" value="3600" />
+          </div>
+          <div>
+            <label for="mname">SOA MNAME (primary NS)</label>
+            <input id="mname" type="text" placeholder="ns1.example.com." />
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label for="rname">SOA RNAME (hostmaster email)</label>
+            <input id="rname" type="text" placeholder="hostmaster.example.com." />
+          </div>
+          <div>
+            <label for="serial">SOA Serial (optional)</label>
+            <input id="serial" type="text" placeholder="auto: YYYYMMDDnn" />
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label for="ns1">NS #1</label>
+            <input id="ns1" type="text" placeholder="ns1.example.com." />
+          </div>
+          <div>
+            <label for="ns2">NS #2</label>
+            <input id="ns2" type="text" placeholder="ns2.example.com." />
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Upload CSV</legend>
+        <div id="drop" class="drop" tabindex="0" role="button" aria-label="Drop CSV here or click to select">
+          <div>Drag & drop CSV here, or click to choose.</div>
+          <div class="help" style="margin-top:.4rem">Expected columns: <span class="badge">name</span> <span class="badge">type</span> <span class="badge">content</span> <span class="badge">ttl</span> <span class="badge">priority</span> <span class="badge">proxied</span> <span class="badge">cf_tags</span></div>
+        </div>
+        <input id="file" type="file" accept=".csv,text/csv" hidden />
+        <div class="btns">
+          <button id="dlTemplate" type="button">Download CSV template</button>
+          <button id="clear" class="danger" type="button">Clear table</button>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Output</legend>
+        <div class="btns">
+          <button id="gen" class="primary" type="button">Generate Zone</button>
+          <button id="copy" class="ok" type="button">Copy</button>
+          <button id="save" class="warn" type="button">Save .zone</button>
+        </div>
+      </fieldset>
+
+      <div class="footer">
+        Tip: TXT strings will be safely quoted and split if needed; names are normalized to FQDN (trailing dot) inside the zone. MX records observe <span class="kbd">priority</span>. CNAME/NS/SOA targets are FQDN’d. Comments like <code>; cf_tags=key:value</code> are preserved.
+      </div>
+    </section>
+
+    <!-- RIGHT: PREVIEW + ZONE -->
+    <section class="card">
+      <h2 style="margin:.2rem 0 0.6rem">Preview</h2>
+      <div class="help" style="margin-bottom:.6rem">Validate rows before generating. Problems are highlighted.</div>
+      <div style="max-height:280px; overflow:auto; border-radius:8px; margin-bottom:.8rem">
+        <table id="preview" aria-label="CSV preview">
+          <thead>
+            <tr>
+              <th>#</th><th>name</th><th>type</th><th>content</th><th>ttl</th><th>priority</th><th>proxied</th><th>cf_tags</th><th>status</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <h2 style="margin:.2rem 0 .6rem">Generated BIND Zone</h2>
+      <textarea id="zoneOut" readonly spellcheck="false"></textarea>
+    </section>
+  </main>
+
+  <script>
+    // --- Utilities (sanitization & helpers) ---
+    const el = id => document.getElementById(id);
+    const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
+    const nowSerial = () => {
+      // YYYYMMDDnn — ensures monotonic increment if same day generations occur
+      const d = new Date();
+      const pad = (x, l=2) => String(x).padStart(l,'0');
+      const base = d.getFullYear() + pad(d.getMonth()+1) + pad(d.getDate());
+      // Use time to derive trailing nn safely
+      const nn = pad(Math.floor(d.getHours()*100/24));
+      return base + nn;
+    };
+
+    // Basic domain-ish label sanitization for UI fields (does not mutate CSV)
+    function sanitizeFQDN(s) {
+      if (!s) return "";
+      // prevent HTML injection
+      s = String(s).replace(/[<>"']/g, "");
+      // ensure one trailing dot for absolute names
+      s = s.trim();
+      if (!s.endsWith(".")) s += ".";
+      return s;
+    }
+
+    function ensureRelativeOrFQDN(name, zoneFQDN) {
+      if (!name) return "";
+      name = String(name).trim();
+      if (name === "@" || name === zoneFQDN || name + "." === zoneFQDN) return zoneFQDN;
+      // If already an absolute FQDN, keep
+      if (name.endsWith(".")) return name;
+      // If relative, append zone
+      return name + "." + (zoneFQDN.endsWith(".") ? zoneFQDN : zoneFQDN + ".");
+    }
+
+    function isIPv4(x){ return /^(\d{1,3}\.){3}\d{1,3}$/.test(x) && x.split('.').every(o=>+o>=0 && +o<=255); }
+    function isIPv6(x){ return /^[0-9A-Fa-f:]+$/.test(x) && x.includes(':'); }
+
+    function quoteTXT(s) {
+      // Split long TXT into <=255 char chunks as per RFC (BIND allows multiple strings)
+      const chunks = [];
+      const str = String(s);
+      for (let i=0; i<str.length; i+=255) chunks.push(str.slice(i, i+255));
+      return chunks.map(c => `"${c.replace(/"/g,'\\"')}"`).join(" ");
+    }
+
+    function parseBool(v){
+      if (typeof v === "boolean") return v;
+      const s = String(v||"").trim().toLowerCase();
+      return ["true","1","yes","y"].includes(s);
+    }
+
+    function csvToRows(text){
+      // Robust-enough RFC4180 CSV parser for common cases (no external deps)
+      const rows = [];
+      let cur = [], cell = "", inQ = false;
+      for (let i=0; i<text.length; i++){
+        const ch = text[i], next = text[i+1];
+        if (inQ){
+          if (ch === '"' && next === '"'){ cell += '"'; i++; continue; }
+          if (ch === '"'){ inQ = false; continue; }
+          cell += ch; continue;
+        }
+        if (ch === '"'){ inQ = true; continue; }
+        if (ch === ','){ cur.push(cell); cell=""; continue; }
+        if (ch === '\r'){ continue; }
+        if (ch === '\n'){ cur.push(cell); rows.push(cur); cur=[]; cell=""; continue; }
+        cell += ch;
+      }
+      cur.push(cell); rows.push(cur);
+      // Trim trailing empty last row
+      if (rows.length && rows[rows.length-1].every(x => x==="")) rows.pop();
+      return rows;
+    }
+
+    function headerIndexMap(header){
+      const map = {};
+      header.forEach((h, i) => map[String(h).trim().toLowerCase()] = i);
+      return map;
+    }
+
+    function asInt(v, fallback=null){
+      if (v === undefined || v === null || v === "") return fallback;
+      const n = Number(v);
+      return Number.isFinite(n) ? Math.trunc(n) : fallback;
+    }
+
+    // --- State ---
+    let records = [];
+    let header = [];
+    const previewBody = el("preview").querySelector("tbody");
+
+    // --- CSV ingestion & preview ---
+    function ingestCSV(text){
+      const rows = csvToRows(text);
+      if (rows.length === 0) {
+        previewBody.innerHTML = "";
+        records = [];
+        return;
+      }
+      header = rows[0].map(h => String(h).trim());
+      const idx = headerIndexMap(header);
+
+      const need = ["name","type","content"];
+      for (const req of need) {
+        if (!(req in idx)) throw new Error(`CSV missing required column: ${req}`);
+      }
+
+      const out = [];
+      for (let r=1; r<rows.length; r++){
+        const raw = rows[r];
+        if (raw.every(v => String(v||"").trim() === "")) continue; // skip empty
+        const rec = {
+          row: r+1,
+          name: raw[idx["name"]] ?? "",
+          type: (raw[idx["type"]] ?? "").toUpperCase().trim(),
+          content: raw[idx["content"]] ?? "",
+          ttl: ("ttl" in idx) ? asInt(raw[idx["ttl"]], null) : null,
+          priority: ("priority" in idx) ? asInt(raw[idx["priority"]], null) : null,
+          proxied: ("proxied" in idx) ? parseBool(raw[idx["proxied"]]) : null,
+          cf_tags: ("cf_tags" in idx) ? String(raw[idx["cf_tags"]] ?? "").trim() : ""
+        };
+        out.push(rec);
+      }
+      records = out;
+      renderPreview();
+    }
+
+    function renderPreview(){
+      previewBody.innerHTML = "";
+      const zone = String(el("zone").value||"").trim();
+      const problems = [];
+      records.forEach((rec, i) => {
+        const row = document.createElement("tr");
+        let status = "OK", problem=false;
+
+        if (!rec.name || !rec.type || !rec.content) { status = "Missing fields"; problem = true; }
+        const type = rec.type;
+        const ttl = rec.ttl;
+
+        if (ttl !== null && (!Number.isInteger(ttl) || ttl<0)) { status = "Bad TTL"; problem = true; }
+
+        if (["A"].includes(type) && !isIPv4(rec.content)) { status = "Bad IPv4"; problem = true; }
+        if (["AAAA"].includes(type) && !isIPv6(rec.content)) { status = "Bad IPv6"; problem = true; }
+        if (["MX"].includes(type) && (rec.priority===null || rec.priority<0)) { status = "Need priority"; problem = true; }
+        if (["CNAME","NS","SRV","PTR"].includes(type) && !String(rec.content).trim()) { status = "Target required"; problem = true; }
+
+        if (!["A","AAAA","CNAME","MX","TXT","NS","SRV","PTR"].includes(type)) { status = "Unknown type"; problem = true; }
+
+        if (problem) problems.push(i);
+
+        row.className = problem ? "problem" : "";
+        const td = (...cells) => "<td>"+cells.map(c=>String(c)).join("")+"</td>";
+        row.innerHTML = `
+          <td>${i+1}</td>
+          <td><code>${escapeHTML(rec.name)}</code></td>
+          <td><span class="badge">${type}</span></td>
+          <td><code>${escapeHTML(rec.content)}</code></td>
+          <td>${rec.ttl ?? ""}</td>
+          <td>${rec.priority ?? ""}</td>
+          <td>${rec.proxied===null?"":(rec.proxied?"true":"false")}</td>
+          <td><code>${escapeHTML(rec.cf_tags||"")}</code></td>
+          <td>${problem?'<span class="badge" style="color:#ffb3b3;border-color:#5c2020;background:#2b1212">Problem</span>':'<span class="badge" style="color:#a8ffb3;border-color:#1f4a2a;background:#0f2614">OK</span>'}</td>
+        `;
+        previewBody.appendChild(row);
+      });
+    }
+
+    function escapeHTML(s){
+      return String(s).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+    }
+
+    // --- Zone generation ---
+    function generateZone(){
+      const z = String(el("zone").value||"").trim().toLowerCase();
+      if (!z) { alert("Please enter a Zone (root domain)."); return ""; }
+      const zoneFQDN = sanitizeFQDN(z);
+
+      const ttlDefault = clamp(asInt(el("ttl").value, 3600), 1, 2147483647);
+      const refresh = clamp(asInt(el("refresh").value, 10000), 60, 2147483647);
+      const retry   = clamp(asInt(el("retry").value, 2400), 60, 2147483647);
+      const expire  = clamp(asInt(el("expire").value, 604800), 300, 2147483647);
+      const minimum = clamp(asInt(el("minimum").value, 3600), 60, 2147483647);
+
+      let mname = sanitizeFQDN(el("mname").value || `ns1.${z}.`);
+      let rname = sanitizeFQDN(el("rname").value || `hostmaster.${z}.`);
+      const ns1 = el("ns1").value ? sanitizeFQDN(el("ns1").value) : `ns1.${zoneFQDN}`;
+      const ns2 = el("ns2").value ? sanitizeFQDN(el("ns2").value) : `ns2.${zoneFQDN}`;
+      const serial = (el("serial").value || "").trim() || nowSerial();
+
+      // Header
+      const out = [];
+      out.push(";;");
+      out.push(`;; Domain:     ${zoneFQDN}`);
+      out.push(`;; Exported:   ${new Date().toISOString().replace('T',' ').replace(/\.\d+Z$/,' UTC')}`);
+      out.push(";;");
+      out.push(";; This file is intended for use for informational and archival");
+      out.push(";; purposes ONLY and MUST be reviewed before use on a production");
+      out.push(";; DNS server. Update SOA/NS records as appropriate.");
+      out.push(";;");
+      out.push(";; SOA Record");
+      out.push(`${zoneFQDN.replace(/\.$/,'')}\t${ttlDefault}\tIN\tSOA\t${mname} ${rname} ${serial} ${refresh} ${retry} ${expire} ${minimum}`);
+      out.push("");
+      out.push(";; NS Records");
+      out.push(`${zoneFQDN}\t86400\tIN\tNS\t${ns1}`);
+      out.push(`${zoneFQDN}\t86400\tIN\tNS\t${ns2}`);
+      out.push("");
+
+      // Group by type like the sample (CNAME, MX, TXT etc.)
+      const order = ["A","AAAA","CNAME","MX","TXT","NS","SRV","PTR"];
+      const groups = {};
+      for (const t of order) groups[t] = [];
+      for (const rec of records){
+        const t = rec.type;
+        if (!groups[t]) groups[t] = [];
+        groups[t].push(rec);
+      }
+
+      for (const t of order){
+        if (!groups[t] || groups[t].length===0) continue;
+        out.push(`;; ${t} Records`);
+        for (const rec of groups[t]){
+          const name = ensureRelativeOrFQDN(rec.name, zoneFQDN);
+          const ttl  = rec.ttl !== null ? clamp(rec.ttl,1,2147483647) : 1; // follow attached example defaults for some (often 1s seen)
+          let line = "";
+          if (t === "A" || t === "AAAA"){
+            line = `${name}\t${ttl}\tIN\t${t}\t${rec.content}`;
+          } else if (t === "CNAME" || t === "NS" || t === "PTR"){
+            const target = sanitizeFQDN(rec.content);
+            line = `${name}\t${ttl}\tIN\t${t}\t${target}`;
+          } else if (t === "MX"){
+            const pr = rec.priority ?? 10;
+            const target = sanitizeFQDN(rec.content);
+            line = `${name}\t${ttl}\tIN\tMX\t${pr} ${target}`;
+          } else if (t === "SRV"){
+            // Optional extended fields not modeled in basic CSV; expect "priority weight port target"
+            // If user supplies priority column, it will populate pr; otherwise expect full "content"
+            line = `${name}\t${ttl}\tIN\tSRV\t${rec.content}`;
+          } else if (t === "TXT"){
+            line = `${name}\t${ttl}\tIN\tTXT\t${quoteTXT(rec.content)}`;
+          } else {
+            // Fallback (future types)
+            line = `${name}\t${ttl}\tIN\t${t}\t${rec.content}`;
+          }
+          if (rec.cf_tags){
+            line += ` ; cf_tags=${rec.cf_tags}`;
+          } else if (rec.proxied !== null){
+            line += ` ; cf_tags=cf-proxied:${rec.proxied ? "true":"false"}`;
+          }
+          out.push(line);
+        }
+        out.push(""); // spacer
+      }
+
+      return out.join("\n").trim()+"\n";
+    }
+
+    // --- File handlers (drop + click) ---
+    const drop = el("drop"), file = el("file");
+
+    function readFile(f){
+      if (!f) return;
+      if (!/\.csv$/i.test(f.name) && f.type !== "text/csv"){
+        // Still attempt text read for safe side
+      }
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          ingestCSV(String(reader.result||""));
+        } catch (e) {
+          alert("CSV error: " + (e && e.message ? e.message : e));
+        }
+      };
+      reader.readAsText(f);
+    }
+
+    drop.addEventListener("click", () => file.click());
+    drop.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); file.click(); }
+    });
+    drop.addEventListener("dragover", e => { e.preventDefault(); drop.classList.add("dragover"); });
+    drop.addEventListener("dragleave", () => drop.classList.remove("dragover"));
+    drop.addEventListener("drop", e => {
+      e.preventDefault(); drop.classList.remove("dragover");
+      const f = e.dataTransfer.files && e.dataTransfer.files[0];
+      readFile(f);
+    });
+    file.addEventListener("change", e => readFile(e.target.files[0]));
+
+    // live-validate preview when header fields change (affects FQDN normalization)
+    ["zone","ttl","refresh","retry","expire","minimum","mname","rname","ns1","ns2"].forEach(id=>{
+      el(id).addEventListener("input", renderPreview);
+    });
+
+    // Buttons
+    el("gen").addEventListener("click", () => {
+      try {
+        const z = generateZone();
+        el("zoneOut").value = z;
+      } catch (e) {
+        alert("Generate error: " + (e && e.message ? e.message : e));
+      }
+    });
+
+    el("copy").addEventListener("click", async () => {
+      const v = el("zoneOut").value;
+      if (!v) { alert("No output to copy."); return; }
+      try {
+        await navigator.clipboard.writeText(v);
+        toast("Copied zone to clipboard");
+      } catch {
+        // Fallback
+        el("zoneOut").select();
+        document.execCommand("copy");
+        toast("Copied zone to clipboard");
+      }
+    });
+
+    el("save").addEventListener("click", () => {
+      const zone = (el("zone").value||"").trim().toLowerCase() || "zone";
+      const blob = new Blob([el("zoneOut").value||""], {type: "text/plain"});
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = `${zone}.zone`;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 0);
+    });
+
+    el("clear").addEventListener("click", () => {
+      records = [];
+      header = [];
+      previewBody.innerHTML = "";
+      el("zoneOut").value = "";
+      file.value = "";
+      toast("Cleared.");
+    });
+
+    el("dlTemplate").addEventListener("click", () => {
+      const csv = [
+        "name,type,content,ttl,priority,proxied,cf_tags",
+        "@,MX,route1.mx.cloudflare.net,1,4,,",
+        "@,MX,route2.mx.cloudflare.net,1,74,,",
+        "@,MX,route3.mx.cloudflare.net,1,85,,",
+        "_mta-sts,CNAME,_mta-sts.mx.cloudflare.net,1,,,cf-proxied:false",
+        "www,CNAME,@,60,,,cf-proxied:false",
+        "hello,MX,feedback-smtp.eu-west-2.amazonses.com,1,10,,",
+        "hello,TXT,v=spf1 include:amazonses.com ~all,1,,,",
+        "@,TXT,v=spf1 include:_spf.mx.cloudflare.net ~all,1,,,",
+        "_dmarc,TXT,v=DMARC1; p=none;,1,,,",
+        "cf2024-1._domainkey,TXT,\"v=DKIM1; h=sha256; k=rsa; p=...\",1,,,",
+        "6gzxi4r4z6n7belmllo6haox4dcttpjt._domainkey,CNAME,6gzxi4r4z6n7belmllo6haox4dcttpjt.dkim.amazonses.com,1,,,cf-proxied:false"
+      ].join("\n");
+      const blob = new Blob([csv], {type:"text/csv"});
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "dns-records-template.csv";
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 0);
+    });
+
+    function toast(msg){
+      const t = document.createElement("div");
+      t.textContent = msg;
+      Object.assign(t.style, {
+        position:"fixed", left:"50%", bottom:"18px", transform:"translateX(-50%)",
+        background:"#0e1e48", color:"#fff", border:"1px solid #394e89", padding:"8px 12px",
+        borderRadius:"8px", zIndex: 9999, fontSize:"14px", boxShadow:"0 6px 24px rgba(0,0,0,.35)"
+      });
+      document.body.appendChild(t);
+      setTimeout(()=>t.remove(), 1800);
+    }
+
+    // Prefill sensible CF-like defaults for convenience
+    (function initDefaults(){
+      el("ttl").value = 3600;
+      el("refresh").value = 10000;
+      el("retry").value = 2400;
+      el("expire").value = 604800;
+      el("minimum").value = 3600;
+    }());
+  </script>
+</body>
+</html>
+
