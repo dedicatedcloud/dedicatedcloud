@@ -1,2 +1,237 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Python Creditor Normaliser Builder</title>
+<link rel="stylesheet" href="https://cdn.simplecss.org/simple.css">
 
-
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    max-width: 900px;
+    margin: 30px auto;
+    padding: 0 10px;
+  }
+  h1 {
+    font-size: 24px;
+    margin-bottom: 10px;
+  }
+  h2 {
+    font-size: 18px;
+    margin-top: 25px;
+  }
+  label {
+    font-weight: bold;
+    display: block;
+    margin-top: 12px;
+  }
+  input[type="text"], textarea {
+    width: 100%;
+    padding: 8px;
+    margin-top: 4px;
+    box-sizing: border-box;
+  }
+  textarea {
+    resize: vertical;
+  }
+  .group-card {
+    border: 1px solid #ddd;
+    padding: 12px;
+    margin-top: 15px;
+    border-radius: 4px;
+    background: #fafafa;
+  }
+  .group-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .group-header span {
+    font-weight: bold;
+  }
+  .small-btn {
+    padding: 4px 8px;
+    font-size: 12px;
+    cursor: pointer;
+  }
+  button {
+    padding: 10px 16px;
+    font-size: 14px;
+    cursor: pointer;
+    margin-top: 15px;
+  }
+  #output {
+  margin-top: 20px;
+  background: #f7f7f7;
+  padding: 12px;
+  white-space: pre;
+  font-family: Consolas, "Courier New", monospace;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  overflow-x: auto;     /* <<< THIS FIXES THE PROBLEM */
+  max-width: 100%;      /* makes sure it never breaks layout */
+}
+
+  .hint {
+    font-size: 13px;
+    color: #555;
+  }
+</style>
+</head>
+<body>
+
+<h1>Python Creditor Normaliser Builder</h1>
+
+<p class="hint">
+Each group = one creditor (e.g. HMRC, BRITISH GAS) and a list of keyword patterns.
+Single word ⇒ <code>"keyword" in compact</code><br>
+Multi-word ⇒ <code>"word1" in tokens and "word2" in tokens</code>
+</p>
+
+<h2>Creditor Groups</h2>
+
+<div id="groups-container"></div>
+
+<button type="button" onclick="addGroup()">+ Add Creditor Group</button>
+<br>
+<button type="button" onclick="buildCode()">Generate Python Code</button>
+
+<h2>Generated Python (paste into <code>normalise_creditor_name()</code>)</h2>
+<div id="output"></div>
+
+<script>
+let groupCounter = 0;
+
+function createGroupCard(normValue = "", keywords = "") {
+  const container = document.getElementById("groups-container");
+
+  const card = document.createElement("div");
+  card.className = "group-card";
+  card.dataset.groupId = String(groupCounter);
+
+  const header = document.createElement("div");
+  header.className = "group-header";
+
+  const title = document.createElement("span");
+  title.textContent = "Creditor Group " + (groupCounter + 1);
+
+  const removeBtn = document.createElement("button");
+  removeBtn.type = "button";
+  removeBtn.className = "small-btn";
+  removeBtn.textContent = "Remove";
+  removeBtn.onclick = function () {
+    container.removeChild(card);
+    renumberGroups();
+  };
+
+  header.appendChild(title);
+  header.appendChild(removeBtn);
+
+  const normLabel = document.createElement("label");
+  normLabel.textContent = "Normalised value (e.g. HMRC)";
+
+  const normInput = document.createElement("input");
+  normInput.type = "text";
+  normInput.className = "norm-input";
+  normInput.placeholder = "HMRC";
+  normInput.value = normValue;
+
+  const wordsLabel = document.createElement("label");
+  wordsLabel.textContent = "Keywords / variants (one per line)";
+
+  const wordsArea = document.createElement("textarea");
+  wordsArea.className = "words-area";
+  wordsArea.rows = 5;
+  wordsArea.placeholder = "hmrc\nhmrc vat\nhm revenue customs\npaye\nvat";
+  wordsArea.value = keywords;
+
+  card.appendChild(header);
+  card.appendChild(normLabel);
+  card.appendChild(normInput);
+  card.appendChild(wordsLabel);
+  card.appendChild(wordsArea);
+
+  container.appendChild(card);
+  groupCounter++;
+}
+
+function renumberGroups() {
+  const cards = document.querySelectorAll(".group-card");
+  cards.forEach((card, idx) => {
+    const headerSpan = card.querySelector(".group-header span");
+    if (headerSpan) {
+      headerSpan.textContent = "Creditor Group " + (idx + 1);
+    }
+  });
+}
+
+function addGroup() {
+  createGroupCard();
+}
+
+function buildCode() {
+  const cards = document.querySelectorAll(".group-card");
+  if (cards.length === 0) {
+    alert("Please add at least one creditor group.");
+    return;
+  }
+
+  let blocks = [];
+
+  cards.forEach(card => {
+    const normInput = card.querySelector(".norm-input");
+    const wordsArea = card.querySelector(".words-area");
+
+    const normRaw = (normInput.value || "").trim();
+    const rawWords = (wordsArea.value || "").trim();
+
+    if (!normRaw || !rawWords) {
+      return;
+    }
+
+    const norm = normRaw.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+    const keywords = rawWords.split("\n")
+      .map(w => w.trim())
+      .filter(w => w.length > 0);
+
+    let lines = [];
+    lines.push(`    # ${normRaw} mapping`);
+
+    keywords.forEach(w => {
+      const lower = w.toLowerCase();
+      if (/\s/.test(lower)) {
+        const parts = lower.split(/\s+/).filter(Boolean);
+        if (parts.length === 0) return;
+        const conds = parts.map(part => {
+          const safePart = part.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+          return `"${safePart}" in tokens`;
+        });
+        lines.push(`    if ${conds.join(" and ")}:`);
+        lines.push(`        return "${norm}"`);
+      } else {
+        const safeKw = lower.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+        lines.push(`    if "${safeKw}" in compact:`);
+        lines.push(`        return "${norm}"`);
+      }
+    });
+
+    blocks.push(lines.join("\n"));
+  });
+
+  if (blocks.length === 0) {
+    document.getElementById("output").textContent = "# No valid groups/keywords.";
+    return;
+  }
+
+  const code = blocks.join("\n\n");
+  document.getElementById("output").textContent = code;
+}
+
+window.onload = function () {
+  createGroupCard("HMRC", "hmrc\nhm revenue customs\nhmrc vat\nhmrc paye\nvat\npaye");
+};
+</script>
+
+</body>
+</html>
+
