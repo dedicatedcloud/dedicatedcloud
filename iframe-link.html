@@ -1,2 +1,159 @@
 
-
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+	  <script type="text/javascript" src="main.js"></script>
+  <!-- <script src="script.js"></script> -->
+  <title>Iframe Generator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      background-color: #f5f5f5;
+    }
+
+    h1,
+    h2 {
+      text-align: center;
+    }
+
+    #iframe-generator-form {
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 4px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    #iframe-generator-form label {
+      display: inline-block;
+      width: 70px;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+
+    #iframe-generator-form input {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 5px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      width: 100%;
+      max-width: 300px;
+      box-sizing: border-box;
+    }
+
+    #url-input {
+      margin-bottom: 10px;
+    }
+
+    button {
+      display: block;
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: #fff;
+      font-weight: bold;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    #iframe-container {
+      max-width: 100%;
+      overflow: auto;
+      margin: 20px auto;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 4px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    textarea {
+      display: block;
+      width: 100%;
+      max-width: 600px;
+      margin: 20px auto;
+      padding: 10px;
+      padding-bottom: 30px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+      resize: none;
+    }
+  </style>
+
+
+</head>
+
+<body>
+	    <div id="menu"></div>
+	<div>
+  <h1>Iframe Generator</h1>
+  <form id="iframe-generator-form">
+    <label for="url-input">URL:</label>
+    <input type="text" id="url-input" placeholder="Filename only" required />
+    <br>
+    <label for="width-input">Width:</label>
+    <input type="number" id="width-input" value="1200" />
+    <br>
+    <label for="height-input">Height:</label>
+    <input type="number" id="height-input" value="580" />
+    <br>
+    <button type="submit">Generate Iframe</button>
+  </form>
+  <h2>Generated Iframe Code:</h2>
+  <textarea id="iframe-code"></textarea>
+  <h2>Generated Iframe:</h2>
+  <div id="iframe-container"></div>
+
+  <!-- <link rel="stylesheet" href="style.css" /> -->
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const form = document.getElementById("iframe-generator-form");
+      const urlInput = document.getElementById("url-input");
+      const widthInput = document.getElementById("width-input");
+      const heightInput = document.getElementById("height-input");
+      const iframeContainer = document.getElementById("iframe-container");
+      const iframeCode = document.getElementById("iframe-code");
+
+      form.addEventListener("submit", function (event) {
+        event.preventDefault();
+        generateIframe();
+      });
+
+      function generateIframe() {
+        const url = urlInput.value;
+        const width = widthInput.value;
+        const height = heightInput.value;
+
+        const iframe = document.createElement("iframe");
+        iframe.src = url;
+        iframe.width = width;
+        iframe.height = height;
+
+        iframeContainer.innerHTML = "";
+        iframeContainer.appendChild(iframe);
+
+        const iframeHTML = `<iframe src="https://5b3a70c9-00a5-4c5a-a00e-e8db2781a02e.pages.dev/${url}" width="${width}" height="${height}"></iframe>`;
+        iframeCode.value = iframeHTML;
+      }
+    });
+
+  </script>
+	</div>
+</body>
+
+</html>
