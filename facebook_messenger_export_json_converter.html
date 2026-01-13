@@ -1,2 +1,575 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Messenger JSON → Bubble Transcript</title>
+  <style>
+    html{touch-action:manipulation}
+    body{
+      background:#e9ebee;color:#1c1e21;direction:ltr;line-height:1.34;
+      margin:0;padding:0;unicode-bidi:embed;overflow-y:scroll
+    }
+    body,button,input,label,select,td,textarea{font-family:Helvetica,Arial,sans-serif;font-size:12px}
+    h1,h2,h3{margin:0;padding:0}
+    h1{font-size:34px;font-weight:700}
+    a{color:#385898;text-decoration:none}
+    a:hover{text-decoration:underline}
 
-
+    .wrap{max-width:860px;margin:0 auto;padding:18px}
+    .card{background:#fff;border-radius:8px;padding:12px;margin:12px 0}
+    .row{display:grid;gap:10px}
+    .row2{display:grid;gap:10px;grid-template-columns:1fr}
+    @media (min-width:860px){.row2{grid-template-columns:1fr 1fr}}
+
+    textarea,input[type="text"],select{
+      width:100%;box-sizing:border-box;border:1px solid #CCD0D5;border-radius:0;
+      padding:8px;font:inherit;background:#fff;color:#1c1e21
+    }
+    textarea{resize:vertical;min-height:220px}
+
+    .btn{
+      background-color:#4267b2;border-color:#DADDE1 #0e1f5b #0e1f5b #d9dfea;
+      border-style:solid;border-width:1px;color:#fff;padding:6px 14px;
+      cursor:pointer
+    }
+    .btn:disabled{opacity:.6;cursor:not-allowed}
+    .btn-aux{background:#ebedf0;border-color:#EBEDF0 #666 #666 #e7e7e7;color:#000}
+
+    .meta{color:#606770;font-weight:600}
+    .small{color:#606770}
+
+    /* Messenger-export-ish header */
+    .hdr{background:#fff;border-radius:8px;display:flex;gap:8px;align-items:center;padding:15px}
+    .dot{background:#3578E5;border-radius:50%;height:16px;width:16px;padding:4px;display:flex;align-items:center;justify-content:center}
+    .dot img{width:16px;height:16px;display:block}
+    .sub{color:#90949c;margin-top:6px}
+
+    /* Bubble chat view */
+    .chat{background:#fff;border-radius:8px;padding:12px}
+    .bubble-row{display:flex;gap:8px;margin:8px 0}
+    .bubble-row.left{justify-content:flex-start}
+    .bubble-row.right{justify-content:flex-end}
+
+    .bubble{
+      max-width:78%;
+      padding:10px 12px;
+      border-radius:16px;
+      word-break:break-word;
+      white-space:pre-wrap;
+      line-height:1.35;
+      box-shadow:0 1px 1px rgba(0,0,0,.08);
+    }
+    .bubble.left{background:#f0f2f5;border-top-left-radius:6px}
+    .bubble.right{background:#3578E5;color:#fff;border-top-right-radius:6px}
+
+    .sender{font-weight:700;margin-bottom:4px;opacity:.85}
+    .bubble.right .sender{opacity:.9}
+    .time{font-size:11px;margin-top:6px;opacity:.7}
+
+    .media{margin-top:8px}
+    .media img{max-width:100%;height:auto;border-radius:10px;display:block}
+
+    .hint{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size:12px;background:#f5f6f7;padding:10px;border-radius:8px;overflow:auto;white-space:pre
+    }
+
+    @media print{
+      body{background:#fff}
+      .builder{display:none}
+      .wrap{padding:0}
+      .chat{border-radius:0}
+      .bubble{box-shadow:none}
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+
+    <header class="hdr">
+      <div class="dot">
+        <img alt="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAAB3RJTUUH4wUJExktKVPrMgAAAAJiS0dEAP+Hj8y/AAAAx0lEQVR42n3LsUpCYRiA4W8SZ6WmwmjxGqIgmtwDB5fwCoQgkKBuwLWpZm/gjG6tx83xtLg1lRQKNoRPaPwYlj3ryxuJEw8KMzOFe8fxk4rMpkwl5aonfylUY8nANoNlbvhPI/QlC7kPwEQX9MNY0opQN8JQTQeMQ3qyWFHWVLJvCubhBUztKWkqx4oM8Bpy0HFgiJF6hJYkDzegawKYyy0kt2HXm23e7USEtm3a8U3Pb58uI3Fm06OjWHPo2Z1T565cu1Bbty8r7oMp62N1aQAAACV0RVh0ZGF0ZTpjcmVhdGUAMjAxOS0wNS0xMFQwMjoyNTo0NS0wNzowMC7bZsEAAAAldEVYdGRhdGU6bW9kaWZ5ADIwMTktMDUtMTBUMDI6MjU6NDUtMDc6MDBfht59AAAAAElFTkSuQmCC">
+      </div>
+      <div style="flex:1">
+        <h1 id="titleView">Facebook  Messenger Bubble Transcript</h1>
+        <div class="sub">
+          Generated on <time id="atView"></time> •✅ No data is collected or used.
+        </div>
+      </div>
+    </header>
+
+    <section class="card builder">
+      <div class="row">
+
+        <div class="row2">
+          <div>
+            <div class="meta">Document title</div>
+            <input id="title" type="text" value="Messenger Transcript (Redacted Bubble View)">
+          </div>
+          <div>
+            <div class="meta">Download filename</div>
+            <input id="downloadName" type="text" value="bubble_transcript_redacted.html">
+          </div>
+        </div>
+
+        <div class="row2">
+          <div>
+            <div class="meta">Show sender labels</div>
+            <select id="showSenders">
+              <option value="yes" selected>Yes (evidence-friendly)</option>
+              <option value="no">No (chat-only look)</option>
+            </select>
+          </div>
+          <div>
+            <div class="meta">Timezone for timestamps</div>
+            <select id="tz">
+              <option value="Europe/London" selected>Europe/London</option>
+              <option value="UTC">UTC</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row2">
+          <div>
+            <div class="meta">Replace these participant names</div>
+            <div class="small">Put real names exactly as they appear in the JSON, comma-separated.</div>
+            <input id="namesToHide" type="text" placeholder="Nicky Brown">
+          </div>
+          <div>
+            <div class="meta">Replacement labels</div>
+            <div class="small">Same count as above. Example: Me,Participant B</div>
+            <input id="nameReplacements" type="text" value="Me,Participant B">
+          </div>
+        </div>
+
+        <div>
+          <div class="meta">Paste JSON thread here</div>
+          <textarea id="jsonInput" spellcheck="false" placeholder='Paste your JSON like: {"participants":[...],"threadName":"...","messages":[...]}'></textarea>
+          <div class="small">This expects your exact format: participants[], threadName, messages[] with senderName/text/timestamp/type/media[].</div>
+        </div>
+
+        <div class="row2">
+          <div>
+            <div class="meta">Upload images (optional)</div>
+            <div class="small">If the JSON references ./media/abc.jpg, upload abc.jpg here to embed it.</div>
+            <input id="imgInput" type="file" accept="image/*" multiple>
+          </div>
+          <div>
+            <div class="meta">Extra redactions (optional)</div>
+            <div class="small">Comma-separated words/phrases to redact in message text.</div>
+            <input id="redact" type="text" placeholder="e.g. phone number, postcode, address">
+          </div>
+        </div>
+
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn" id="btnRender" type="button">Render bubbles</button>
+          <button class="btn btn-aux" id="btnDownload" type="button" disabled>Download HTML</button>
+          <button class="btn btn-aux" id="btnClear" type="button">Clear</button>
+        </div>
+
+        <div id="status" class="small"></div>
+
+        <div class="small">Note: media is embedded only if you upload the matching files. Otherwise it shows a placeholder.</div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="meta">Bubble view preview</div>
+      <div class="chat" id="chat">
+        <div class="small">No thread rendered yet.</div>
+      </div>
+    </section>
+
+  </div>
+
+<script>
+(function(){
+  "use strict";
+
+  var els = {
+    title: document.getElementById("title"),
+    downloadName: document.getElementById("downloadName"),
+    showSenders: document.getElementById("showSenders"),
+    tz: document.getElementById("tz"),
+    namesToHide: document.getElementById("namesToHide"),
+    nameReplacements: document.getElementById("nameReplacements"),
+    jsonInput: document.getElementById("jsonInput"),
+    imgInput: document.getElementById("imgInput"),
+    redact: document.getElementById("redact"),
+    btnRender: document.getElementById("btnRender"),
+    btnDownload: document.getElementById("btnDownload"),
+    btnClear: document.getElementById("btnClear"),
+    status: document.getElementById("status"),
+    chat: document.getElementById("chat"),
+    titleView: document.getElementById("titleView"),
+    atView: document.getElementById("atView")
+  };
+
+  els.atView.textContent = new Date().toLocaleString("en-GB", { dateStyle: "full", timeStyle: "short" });
+
+  var imagesByFilename = new Map(); // "abc.jpg" -> dataUrl
+  var builtHtml = "";
+
+  function setStatus(msg){ els.status.textContent = msg || ""; }
+
+  function safeFilename(name){
+    var n = String(name || "").trim() || "bubble_transcript_redacted.html";
+    var cleaned = n.replace(/[\\\/:*?"<>|\u0000-\u001F]/g, "_");
+    return cleaned.toLowerCase().endsWith(".html") ? cleaned : cleaned + ".html";
+  }
+
+  function normalizeNewlines(s){
+    return String(s || "").replace(/\r\n/g,"\n").replace(/\r/g,"\n");
+  }
+
+  function escapeHtml(s){
+    return String(s ?? "")
+      .replace(/&/g,"&amp;")
+      .replace(/</g,"&lt;")
+      .replace(/>/g,"&gt;")
+      .replace(/\"/g,"&quot;")
+      .replace(/'/g,"&#39;");
+  }
+
+  function parseJsonStrict(raw){
+    var t = normalizeNewlines(raw).trim();
+    if(!t) throw new Error("No JSON pasted.");
+    try { return JSON.parse(t); }
+    catch(e){ throw new Error("JSON parse failed. Ensure you pasted the full object starting with { and ending with }."); }
+  }
+
+  function buildNameMap(){
+    var from = (els.namesToHide.value || "").split(",").map(function(x){return x.trim();}).filter(Boolean);
+    var to = (els.nameReplacements.value || "").split(",").map(function(x){return x.trim();}).filter(Boolean);
+
+    var map = new Map();
+    for (var i=0;i<from.length;i++){
+      map.set(from[i], to[i] || ("Participant " + (i+1)));
+    }
+    return map;
+  }
+
+  function applyExtraRedactions(text, redactCsv){
+    var raw = String(redactCsv || "").trim();
+    if(!raw) return text;
+    var tokens = raw.split(",").map(function(t){ return t.trim(); }).filter(Boolean);
+    if(!tokens.length) return text;
+
+    var out = text;
+    tokens.forEach(function(tok){
+      var escaped = tok.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      var re = new RegExp(escaped, "gi");
+      out = out.replace(re, "███");
+    });
+    return out;
+  }
+
+  function formatTs(ms, tz){
+    var d = new Date(ms);
+    if (!Number.isFinite(d.getTime())) return "";
+    // "22 Aug 2024, 14:19"
+    return new Intl.DateTimeFormat("en-GB", {
+      timeZone: tz,
+      year: "numeric", month: "short", day: "2-digit",
+      hour: "2-digit", minute: "2-digit",
+      hour12: false
+    }).format(d).replace(",", "");
+  }
+
+  function filenameFromUri(uri){
+    var u = String(uri || "");
+    if(!u) return "";
+    var parts = u.split("/");
+    return parts[parts.length-1] || u;
+  }
+
+  function readFileAsDataUrl(file){
+    return new Promise(function(resolve, reject){
+      var fr = new FileReader();
+      fr.onerror = function(){ reject(new Error("Failed to read file")); };
+      fr.onload = function(){ resolve(String(fr.result || "")); };
+      fr.readAsDataURL(file);
+    });
+  }
+
+  els.imgInput.addEventListener("change", function(e){
+    var files = Array.from(e.target.files || []);
+    if(!files.length) return;
+
+    setStatus("Reading images…");
+    (async function(){
+      try{
+        for (var i=0;i<files.length;i++){
+          var f = files[i];
+          var dataUrl = await readFileAsDataUrl(f);
+          imagesByFilename.set(f.name, dataUrl);
+        }
+        setStatus("Loaded " + files.length + " image(s).");
+      }catch(err){
+        setStatus(String(err && err.message ? err.message : err));
+      }
+    })();
+  });
+
+  function renderBubbles(threadObj){
+    var nameMap = buildNameMap();
+    var tz = els.tz.value || "Europe/London";
+    var showSenders = els.showSenders.value === "yes";
+
+    var msgs = Array.isArray(threadObj.messages) ? threadObj.messages.slice() : [];
+    if(!msgs.length) throw new Error("JSON has no messages[].");
+
+    // Sort oldest -> newest
+    msgs.sort(function(a,b){
+      var ta = Number(a.timestamp)||0;
+      var tb = Number(b.timestamp)||0;
+      return ta - tb;
+    });
+
+    var frag = document.createDocumentFragment();
+
+    // Determine "Me" side: whichever replacement equals "Me" (or first replacement)
+    var meLabel = null;
+    nameMap.forEach(function(v,k){
+      if (String(v).toLowerCase() === "me") meLabel = v;
+    });
+    if (!meLabel) {
+      // fallback to first replacement if provided
+      var rep = (els.nameReplacements.value || "").split(",").map(function(x){return x.trim();}).filter(Boolean);
+      meLabel = rep[0] || "Me";
+    }
+
+    for (var i=0;i<msgs.length;i++){
+      var m = msgs[i] || {};
+      if (m.isUnsent) continue; // default exclude unsent (keeps it clean)
+
+      var senderRaw = String(m.senderName || "Unknown");
+      var sender = nameMap.get(senderRaw) || senderRaw;
+
+      var isMe = (sender === meLabel);
+      var side = isMe ? "right" : "left";
+
+      var row = document.createElement("div");
+      row.className = "bubble-row " + side;
+
+      var bubble = document.createElement("div");
+      bubble.className = "bubble " + side;
+
+      if (showSenders) {
+        var senderEl = document.createElement("div");
+        senderEl.className = "sender";
+        senderEl.textContent = sender;
+        bubble.appendChild(senderEl);
+      }
+
+      var type = String(m.type || "text").toLowerCase();
+      var txt = normalizeNewlines(String(m.text || ""));
+      txt = applyExtraRedactions(txt, els.redact.value || "");
+
+      if (type === "text") {
+        if (txt.trim()) {
+          var msgEl = document.createElement("div");
+          msgEl.textContent = txt;
+          msgEl.style.whiteSpace = "pre-wrap";
+          bubble.appendChild(msgEl);
+        }
+      }
+
+      if (type === "media") {
+        var mediaWrap = document.createElement("div");
+        mediaWrap.className = "media";
+
+        var mediaArr = Array.isArray(m.media) ? m.media : [];
+        if (mediaArr.length) {
+          for (var j=0;j<mediaArr.length;j++){
+            var uri = mediaArr[j] && mediaArr[j].uri ? String(mediaArr[j].uri) : "";
+            var fn = filenameFromUri(uri);
+            var dataUrl = imagesByFilename.get(fn);
+
+            if (dataUrl && String(dataUrl).startsWith("data:image/")) {
+              var img = document.createElement("img");
+              img.src = dataUrl;
+              img.alt = fn || "media";
+              mediaWrap.appendChild(img);
+            } else {
+              var ph = document.createElement("div");
+              ph.textContent = "[Media referenced: " + (fn || uri || "unknown") + "]";
+              ph.style.opacity = "0.85";
+              mediaWrap.appendChild(ph);
+            }
+          }
+        } else {
+          var ph2 = document.createElement("div");
+          ph2.textContent = "[Media attached]";
+          ph2.style.opacity = "0.85";
+          mediaWrap.appendChild(ph2);
+        }
+
+        bubble.appendChild(mediaWrap);
+      }
+
+      var stamp = formatTs(Number(m.timestamp)||0, tz);
+      if (stamp) {
+        var timeEl = document.createElement("div");
+        timeEl.className = "time";
+        timeEl.textContent = stamp;
+        bubble.appendChild(timeEl);
+      }
+
+      row.appendChild(bubble);
+      frag.appendChild(row);
+    }
+
+    els.chat.innerHTML = "";
+    els.chat.appendChild(frag);
+  }
+
+  function buildExportHtml(threadObj){
+    var css = document.querySelector("style").textContent;
+    var title = String(els.title.value || "").trim() || "Messenger Transcript (Redacted Bubble View)";
+    var tz = els.tz.value || "Europe/London";
+    var showSenders = els.showSenders.value === "yes";
+    var nameMap = buildNameMap();
+
+    var imagesObj = {};
+    imagesByFilename.forEach(function(v,k){ imagesObj[k]=v; });
+
+    // Create a redacted copy of threadObj for embedding (names + extra redactions)
+    var clean = JSON.parse(JSON.stringify(threadObj));
+    clean._presentation = {
+      tz: tz,
+      showSenders: showSenders,
+      nameMap: Object.fromEntries(Array.from(nameMap.entries())),
+      images: imagesObj,
+      extraRedactions: (els.redact.value || "")
+    };
+
+    // Apply name map + extra redactions into message text for the export display (not changing the original you pasted)
+    if (Array.isArray(clean.messages)) {
+      for (var i=0;i<clean.messages.length;i++){
+        var m = clean.messages[i] || {};
+        var senderRaw = String(m.senderName || "Unknown");
+        m.senderName = nameMap.get(senderRaw) || senderRaw;
+        if (m.type === "text" && typeof m.text === "string") {
+          m.text = applyExtraRedactions(m.text, els.redact.value || "");
+        }
+      }
+      // Sort for display
+      clean.messages.sort(function(a,b){ return (Number(a.timestamp)||0) - (Number(b.timestamp)||0); });
+    }
+
+    var payloadJson = JSON.stringify({ title: title, thread: clean }).replace(/</g, "\\u003c");
+
+    var out = [];
+    out.push("<!doctype html>");
+    out.push('<html lang="en-GB"><head>');
+    out.push('<meta charset="utf-8" />');
+    out.push('<meta name="viewport" content="width=device-width,initial-scale=1" />');
+    out.push("<title>" + escapeHtml(title) + "</title>");
+    out.push("<style>" + css + "</style>");
+    out.push("</head><body>");
+    out.push('<div class="wrap">');
+    out.push('<header class="hdr"><div class="dot"><img alt="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAAB3RJTUUH4wUJExktKVPrMgAAAAJiS0dEAP+Hj8y/AAAAx0lEQVR42n3LsUpCYRiA4W8SZ6WmwmjxGqIgmtwDB5fwCoQgkKBuwLWpZm/gjG6tx83xtLg1lRQKNoRPaPwYlj3ryxuJEw8KMzOFe8fxk4rMpkwl5aonfylUY8nANoNlbvhPI/QlC7kPwEQX9MNY0opQN8JQTQeMQ3qyWFHWVLJvCubhBUztKWkqx4oM8Bpy0HFgiJF6hJYkDzegawKYyy0kt2HXm23e7USEtm3a8U3Pb58uI3Fm06OjWHPo2Z1T565cu1Bbty8r7oMp62N1aQAAACV0RVh0ZGF0ZTpjcmVhdGUAMjAxOS0wNS0xMFQwMjoyNTo0NS0wNzowMC7bZsEAAAAldEVYdGRhdGU6bW9kaWZ5ADIwMTktMDUtMTBUMDI6MjU6NDUtMDc6MDBfht59AAAAAElFTkSuQmCC"></div><div style="flex:1"><h1>'
+      + escapeHtml(title) +
+      '</h1><div class="sub">Exported on <time datetime="' + new Date().toISOString() + '">' +
+      escapeHtml(new Date().toLocaleString("en-GB",{dateStyle:"full",timeStyle:"short"})) +
+      "</time></div></div></header>");
+    out.push('<section class="card"><div class="meta">Thread</div><div class="small">Thread name: '
+      + escapeHtml(clean.threadName || "") + "</div></section>");
+    out.push('<section class="card"><div class="chat" id="chat"></div></section>');
+    out.push("</div>");
+    out.push("<script>");
+    out.push("(function(){");
+    out.push('"use strict";');
+    out.push("var data = " + payloadJson + ";");
+    out.push("var thread = data.thread || {}; var pres = thread._presentation || {};");
+    out.push("var tz = pres.tz || 'Europe/London';");
+    out.push("var showSenders = !!pres.showSenders;");
+    out.push("var imagesByFilename = new Map(Object.entries(pres.images || {}));");
+    out.push("function filenameFromUri(uri){ var u=String(uri||''); if(!u) return ''; var p=u.split('/'); return p[p.length-1]||u; }");
+    out.push("function formatTs(ms){ var d=new Date(ms); if(!Number.isFinite(d.getTime())) return ''; return new Intl.DateTimeFormat('en-GB',{timeZone:tz,year:'numeric',month:'short',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).format(d).replace(',',''); }");
+    out.push("var chat=document.getElementById('chat');");
+    out.push("var msgs=Array.isArray(thread.messages)?thread.messages.slice():[];");
+    out.push("for (var i=0;i<msgs.length;i++){");
+    out.push("  var m=msgs[i]||{}; if(m.isUnsent) continue;");
+    out.push("  var sender=String(m.senderName||'Unknown');");
+    out.push("  var isMe = sender === 'Me';"); // If user sets different label, they can change it in builder; this keeps export stable.
+    out.push("  var side = isMe ? 'right' : 'left';");
+    out.push("  var row=document.createElement('div'); row.className='bubble-row '+side;");
+    out.push("  var bubble=document.createElement('div'); bubble.className='bubble '+side;");
+    out.push("  if(showSenders){ var s=document.createElement('div'); s.className='sender'; s.textContent=sender; bubble.appendChild(s); }");
+    out.push("  var type=String(m.type||'text').toLowerCase();");
+    out.push("  var txt=String(m.text||'');");
+    out.push("  if(type==='text' && txt.trim()){ var msg=document.createElement('div'); msg.textContent=txt; msg.style.whiteSpace='pre-wrap'; bubble.appendChild(msg); }");
+    out.push("  if(type==='media'){ var w=document.createElement('div'); w.className='media'; var arr=Array.isArray(m.media)?m.media:[]; if(arr.length){ for(var j=0;j<arr.length;j++){ var uri=arr[j]&&arr[j].uri?String(arr[j].uri):''; var fn=filenameFromUri(uri); var durl=imagesByFilename.get(fn); if(durl && String(durl).startsWith('data:image/')){ var img=document.createElement('img'); img.src=durl; img.alt=fn||'media'; w.appendChild(img);} else { var ph=document.createElement('div'); ph.textContent='[Media referenced: '+(fn||uri||'unknown')+']'; ph.style.opacity='0.85'; w.appendChild(ph);} } } else { var ph2=document.createElement('div'); ph2.textContent='[Media attached]'; ph2.style.opacity='0.85'; w.appendChild(ph2);} bubble.appendChild(w);} ");
+    out.push("  var stamp=formatTs(Number(m.timestamp)||0); if(stamp){ var t=document.createElement('div'); t.className='time'; t.textContent=stamp; bubble.appendChild(t);} ");
+    out.push("  row.appendChild(bubble); chat.appendChild(row);");
+    out.push("}");
+    out.push("})();");
+    out.push("<\/script>");
+    out.push("</body></html>");
+
+    return out.join("");
+  }
+
+  function downloadText(filename, text){
+    var blob = new Blob([text], { type: "text/html;charset=utf-8" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = safeFilename(filename);
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 5000);
+  }
+
+  els.btnRender.addEventListener("click", function(){
+    try{
+      var title = String(els.title.value || "").trim() || "Messenger Transcript (Redacted Bubble View)";
+      els.titleView.textContent = title;
+
+      var obj = parseJsonStrict(els.jsonInput.value);
+      if(!obj || typeof obj !== "object") throw new Error("JSON must be an object.");
+
+      if(!Array.isArray(obj.participants) || !Array.isArray(obj.messages)) {
+        throw new Error("JSON missing participants[] or messages[].");
+      }
+
+      renderBubbles(obj);
+      builtHtml = buildExportHtml(obj);
+
+      els.btnDownload.disabled = false;
+      els.downloadName.value = safeFilename(els.downloadName.value);
+
+      setStatus("Rendered bubbles. Ready to download.");
+    }catch(err){
+      builtHtml = "";
+      els.btnDownload.disabled = true;
+      setStatus(String(err && err.message ? err.message : err));
+    }
+  });
+
+  els.btnDownload.addEventListener("click", function(){
+    if(!builtHtml) return;
+    downloadText(els.downloadName.value, builtHtml);
+  });
+
+  els.btnClear.addEventListener("click", function(){
+    els.jsonInput.value = "";
+    els.imgInput.value = "";
+    els.redact.value = "";
+    imagesByFilename = new Map();
+    builtHtml = "";
+    els.btnDownload.disabled = true;
+    els.chat.innerHTML = '<div class="small">No thread rendered yet.</div>';
+    setStatus("");
+  });
+
+})();
+</script>
+</body>
+</html>
+
