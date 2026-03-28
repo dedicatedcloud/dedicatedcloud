@@ -1,0 +1,335 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Anchor Tag Generator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 16px;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: #111827;
+            color: #e5e7eb;
+        }
+
+        h1 {
+            font-size: 1.4rem;
+            margin-bottom: 0.5rem;
+        }
+
+        p {
+            margin: 0 0 1rem;
+            font-size: 0.9rem;
+            color: #9ca3af;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.8rem;
+            margin-bottom: 4px;
+            color: #9ca3af;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 220px;
+            resize: vertical;
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid #374151;
+            background: #020617;
+            color: #e5e7eb;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+
+        textarea:focus {
+            outline: 2px solid #3b82f6;
+            outline-offset: 1px;
+            border-color: #3b82f6;
+        }
+
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        button {
+            cursor: pointer;
+            border: none;
+            border-radius: 999px;
+            padding: 8px 16px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #3b82f6;
+            color: #f9fafb;
+            box-shadow: 0 10px 15px -3px rgba(15, 23, 42, 0.7);
+            transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.1s ease;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 15px 25px -5px rgba(15, 23, 42, 0.9);
+            background: #2563eb;
+        }
+
+        button:active {
+            transform: translateY(0);
+            box-shadow: 0 8px 10px -5px rgba(15, 23, 42, 0.9);
+            background: #1d4ed8;
+        }
+
+        button.secondary {
+            background: transparent;
+            color: #e5e7eb;
+            border: 1px solid #4b5563;
+            box-shadow: none;
+        }
+
+        button.secondary:hover {
+            background: #111827;
+            box-shadow: none;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.75rem;
+            padding: 3px 8px;
+            border-radius: 999px;
+            background: #111827;
+            border: 1px solid #1f2937;
+            color: #9ca3af;
+            margin-bottom: 8px;
+        }
+
+        .status {
+            font-size: 0.8rem;
+            min-height: 1.4em;
+            color: #9ca3af;
+        }
+
+        .status.success {
+            color: #22c55e;
+        }
+
+        .status.error {
+            color: #f97316;
+        }
+
+        .small-note {
+            font-size: 0.75rem;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+
+        .example {
+            font-size: 0.75rem;
+            background: #020617;
+            border-radius: 6px;
+            padding: 6px 8px;
+            border: 1px dashed #1f2937;
+            margin-top: 4px;
+        }
+
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            font-size: 0.75rem;
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Wrap Strings in &lt;a href="" target="_blank"&gt;&lt;/a&gt;</h1>
+        <p>Paste your URLs (or any strings) in the left box and matching labels in the right box (one per line). Then
+            click <strong>Generate</strong> to create ready-to-paste anchor tags.</p>
+
+        <div class="badge">
+            <span>Tip</span>
+            <span>Line 1 ↔ Line 1, Line 2 ↔ Line 2, etc.</span>
+        </div>
+
+        <div class="grid">
+            <div>
+                <label for="hrefInput">
+                    HREF / URL list
+                </label>
+                <textarea id="hrefInput"
+                    placeholder="https://example.com&#10;https://another-site.com&#10;/relative/path"></textarea>
+                <div class="small-note">
+                    One value per line. Empty lines are ignored.
+                </div>
+            </div>
+
+            <div>
+                <label for="labelInput">
+                    Label / Link text list
+                </label>
+                <textarea id="labelInput" placeholder="Example site&#10;Another site&#10;Relative link"></textarea>
+                <div class="small-note">
+                    One value per line. If a line is empty, the URL will be used as the label.
+                </div>
+            </div>
+        </div>
+
+        <div class="actions">
+            <button id="generateBtn" type="button">
+                Generate &lt;a&gt; Tags
+            </button>
+            <button id="copyBtn" type="button" class="secondary">
+                Copy Output
+            </button>
+            <button id="clearBtn" type="button" class="secondary">
+                Clear All
+            </button>
+        </div>
+
+        <label for="output">
+            Output (generated anchor tags)
+        </label>
+        <textarea id="output" readonly
+            placeholder='&lt;a href="https://example.com" target="_blank"&gt;Example site&lt;/a&gt;'></textarea>
+        <div id="status" class="status"></div>
+
+        <div class="example">
+            <div><strong>Example output:</strong></div>
+            <code>&lt;a href="https://example.com" target="_blank"&gt;Example site&lt;/a&gt;</code>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            const hrefInput = document.getElementById('hrefInput');
+            const labelInput = document.getElementById('labelInput');
+            const output = document.getElementById('output');
+            const generateBtn = document.getElementById('generateBtn');
+            const copyBtn = document.getElementById('copyBtn');
+            const clearBtn = document.getElementById('clearBtn');
+            const status = document.getElementById('status');
+
+            function escapeHtml(str) {
+                return String(str)
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#39;');
+            }
+
+            function generate() {
+                const hrefLines = hrefInput.value.split(/\r?\n/);
+                const labelLines = labelInput.value.split(/\r?\n/);
+
+                const maxLen = Math.max(hrefLines.length, labelLines.length);
+                const anchors = [];
+
+                for (let i = 0; i < maxLen; i++) {
+                    const rawHref = (hrefLines[i] || '').trim();
+                    const rawLabel = (labelLines[i] || '').trim();
+
+                    if (!rawHref && !rawLabel) {
+                        continue; // skip empty row
+                    }
+
+                    const href = rawHref || '#';
+                    const label = rawLabel || rawHref || '#';
+
+                    const safeHref = escapeHtml(href);
+                    const safeLabel = escapeHtml(label);
+
+                    anchors.push(
+                        `<a href="${safeHref}" target="_blank">${safeLabel}</a>`
+                    );
+                }
+
+                output.value = anchors.join('\n');
+                if (anchors.length === 0) {
+                    status.textContent = 'Nothing generated – no inputs found.';
+                    status.className = 'status error';
+                } else {
+                    status.textContent = `Generated ${anchors.length} anchor tag${anchors.length > 1 ? 's' : ''}.`;
+                    status.className = 'status success';
+                }
+            }
+
+            function copyOutput() {
+                if (!output.value.trim()) {
+                    status.textContent = 'Nothing to copy.';
+                    status.className = 'status error';
+                    return;
+                }
+                output.select();
+                try {
+                    const ok = document.execCommand('copy');
+                    if (ok) {
+                        status.textContent = 'Output copied to clipboard.';
+                        status.className = 'status success';
+                    } else {
+                        status.textContent = 'Unable to copy. Please copy manually.';
+                        status.className = 'status error';
+                    }
+                } catch (e) {
+                    status.textContent = 'Copy failed. Please copy manually.';
+                    status.className = 'status error';
+                } finally {
+                    window.getSelection().removeAllRanges();
+                }
+            }
+
+            function clearAll() {
+                hrefInput.value = '';
+                labelInput.value = '';
+                output.value = '';
+                status.textContent = '';
+                status.className = 'status';
+            }
+
+            generateBtn.addEventListener('click', generate);
+            copyBtn.addEventListener('click', copyOutput);
+            clearBtn.addEventListener('click', clearAll);
+
+            // Keyboard shortcut: Ctrl+Enter to generate
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                    e.preventDefault();
+                    generate();
+                }
+            });
+        })();
+    </script>
+</body>
+
+</html>
