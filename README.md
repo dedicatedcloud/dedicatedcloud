@@ -71,7 +71,59 @@
 
 
 
+## Index Dir
 
+```
+#!/usr/bin/env bash
+set -euo pipefail
+
+OUTPUT_FILE="index.htm"
+TITLE="Index"
+
+html_escape() {
+    local s="${1:-}"
+    s="${s//&/&amp;}"
+    s="${s//</&lt;}"
+    s="${s//>/&gt;}"
+    s="${s//\"/&quot;}"
+    s="${s//\'/&#39;}"
+    printf '%s' "$s"
+}
+
+{
+    printf '%s\n' '<!doctype html>'
+    printf '%s\n' '<html lang="en">'
+    printf '%s\n' '<head>'
+    printf '%s\n' '  <meta charset="utf-8">'
+    printf '%s\n' '  <meta name="viewport" content="width=device-width, initial-scale=1">'
+    printf '  <title>%s</title>\n' "$(html_escape "$TITLE")"
+    printf '%s\n' '  <style>'
+    printf '%s\n' '    body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.5; }'
+    printf '%s\n' '    h1 { margin-bottom: 20px; }'
+    printf '%s\n' '    ul { padding-left: 20px; }'
+    printf '%s\n' '    li { margin-bottom: 8px; }'
+    printf '%s\n' '    a { color: #0645ad; text-decoration: none; }'
+    printf '%s\n' '    a:hover { text-decoration: underline; }'
+    printf '%s\n' '  </style>'
+    printf '%s\n' '</head>'
+    printf '%s\n' '<body>'
+    printf '  <h1>%s</h1>\n' "$(html_escape "$TITLE")"
+    printf '%s\n' '  <ul>'
+
+    find . -maxdepth 1 -type f \( -iname '*.html' -o -iname '*.htm' \) ! -iname 'index.html' ! -iname 'index.htm' -printf '%f\n' \
+        | LC_ALL=C sort \
+        | while IFS= read -r file; do
+            escaped_file="$(html_escape "$file")"
+            printf '    <li><a href="%s">%s</a></li>\n' "$escaped_file" "$escaped_file"
+        done
+
+    printf '%s\n' '  </ul>'
+    printf '%s\n' '</body>'
+    printf '%s\n' '</html>'
+} > "$OUTPUT_FILE"
+
+printf 'Created %s\n' "$OUTPUT_FILE"
+```
 
 
 
