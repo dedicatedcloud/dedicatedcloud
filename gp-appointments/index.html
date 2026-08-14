@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#075b4c">
+  <meta name="description" content="View upcoming GP appointments and their cancellation links.">
+  <title>My GP appointments</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <div><span class="eyebrow">Personal health organiser</span><h1>My appointments</h1></div>
+    <button id="settings-button" class="icon-button" type="button" aria-label="Open settings">Settings</button>
+  </header>
+  <main>
+    <section class="hero" aria-labelledby="next-heading">
+      <p id="next-heading">Next appointment</p>
+      <div id="next-appointment" class="next-card"><p class="muted">Connect your Apps Script to get started.</p></div>
+    </section>
+    <section class="list-section" aria-labelledby="upcoming-heading">
+      <div class="section-heading"><h2 id="upcoming-heading">Upcoming</h2><button id="refresh-button" type="button">Refresh</button></div>
+      <p id="status" class="status" role="status" aria-live="polite"></p>
+      <div id="appointment-list" class="appointment-list"></div>
+    </section>
+  </main>
+  <dialog id="settings-dialog">
+    <form id="settings-form" method="dialog">
+      <div class="dialog-heading"><h2>Connection settings</h2><button class="close" value="cancel" aria-label="Close">×</button></div>
+      <label>Apps Script web app URL<input id="endpoint" type="url" required placeholder="https://script.google.com/macros/s/…/exec"></label>
+      <label>API token<input id="token" type="password" required autocomplete="off"></label>
+      <p class="hint">Saved only on this device. The cached appointment list may contain private health information.</p>
+      <button class="primary" value="save">Save and connect</button>
+      <button id="clear-button" class="danger" type="button">Clear this device</button>
+    </form>
+  </dialog>
+  <template id="appointment-template">
+    <article class="appointment-card">
+      <div class="date-tile"><strong class="day"></strong><span class="month"></span></div>
+      <div class="appointment-copy"><p class="time"></p><h3></h3><p class="location"></p><a class="cancel-link" target="_blank" rel="noopener noreferrer">Change or cancel</a></div>
+    </article>
+  </template>
+  <script src="app.js" defer></script>
+</body>
+</html>

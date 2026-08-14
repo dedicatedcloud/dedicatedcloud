@@ -1,0 +1,19 @@
+:root { color-scheme: light; font-family: Inter, ui-sans-serif, system-ui, -apple-system, sans-serif; background:#f4f7f5; color:#15322c; }
+* { box-sizing:border-box; }
+body { margin:0; min-height:100vh; background:linear-gradient(145deg,#e0f3ec 0,#f4f7f5 38%); }
+header, main { width:min(760px,100%); margin:auto; padding:24px; }
+header { display:flex; align-items:center; justify-content:space-between; padding-top:max(26px,env(safe-area-inset-top)); }
+h1,h2,h3,p { margin-top:0; } h1 { margin-bottom:0; font-size:clamp(2rem,8vw,3.25rem); letter-spacing:-.05em; } h2 { margin:0; }
+.eyebrow { color:#35766a; text-transform:uppercase; letter-spacing:.12em; font-size:.7rem; font-weight:800; }
+button,a { font:inherit; } button { cursor:pointer; }
+.icon-button,#refresh-button { border:1px solid #b7d0c9; background:#fff; color:#075b4c; padding:10px 14px; border-radius:999px; font-weight:700; }
+.hero { background:#075b4c; color:white; border-radius:28px; padding:24px; box-shadow:0 18px 50px #075b4c26; }
+.hero>p { color:#b9eadc; font-size:.78rem; font-weight:800; letter-spacing:.1em; text-transform:uppercase; }
+.next-card h2 { margin:.25rem 0 .5rem; font-size:clamp(1.5rem,6vw,2.25rem); }.next-card .meta { margin:0; color:#d5efe8; }
+.next-card .cancel-link { display:inline-block; margin-top:18px; background:#fff; color:#075b4c; }
+.list-section { padding-top:34px; }.section-heading { display:flex; align-items:center; justify-content:space-between; }.status { min-height:1.5em; color:#55736d; margin:12px 0; }
+.appointment-list { display:grid; gap:12px; }.appointment-card { display:grid; grid-template-columns:64px 1fr; gap:16px; padding:18px; background:#fff; border:1px solid #dce8e4; border-radius:20px; box-shadow:0 8px 24px #244d430a; }
+.date-tile { align-self:start; text-align:center; background:#e3f4ee; border-radius:14px; padding:9px 4px; color:#075b4c; }.day { display:block; font-size:1.5rem; }.month { font-size:.72rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; }
+.appointment-copy h3 { margin:2px 0 5px; }.time,.location { margin:0; color:#61746f; }.time { font-size:.8rem; font-weight:800; text-transform:uppercase; letter-spacing:.05em; }.cancel-link { display:inline-flex; margin-top:12px; padding:9px 12px; border-radius:10px; background:#e3f4ee; color:#075b4c; font-weight:800; text-decoration:none; }.muted { color:#b9d5ce; }
+dialog { width:min(520px,calc(100% - 32px)); border:0; border-radius:24px; padding:0; box-shadow:0 24px 80px #102b2466; }dialog::backdrop { background:#102b2499; }form { padding:24px; }.dialog-heading { display:flex; justify-content:space-between; align-items:center; }.close { border:0; background:transparent; font-size:2rem; color:#47655e; }label { display:grid; gap:7px; margin:18px 0; font-weight:750; }input { width:100%; border:1px solid #aac5be; border-radius:10px; padding:12px; font:inherit; }.hint { color:#647b75; font-size:.85rem; }.primary,.danger { width:100%; border:0; border-radius:12px; padding:13px; font-weight:800; }.primary { background:#075b4c; color:#fff; }.danger { background:transparent; color:#9a2930; margin-top:8px; }
+@media (max-width:480px) { header,main { padding-left:16px; padding-right:16px; }.hero { border-radius:22px; } }
